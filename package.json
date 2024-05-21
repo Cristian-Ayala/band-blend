@@ -15,6 +15,8 @@
     "@fontsource/roboto": "^5.0.13",
     "@mui/icons-material": "^5.15.16",
     "@mui/material": "^5.15.16",
+    "@mui/x-date-pickers": "^7.4.0",
+    "dayjs": "^1.11.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.0"
@@ -28,7 +30,7 @@
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.38",
     "standard": "^17.1.0",
@@ -37,6 +39,9 @@
     "vite": "^5.2.0"
   },
   "eslintConfig": {
-    "extends": "standard"
+    "extends": [
+      "standard",
+      "plugin:react-hooks/recommended"
+    ]
   }
 }
