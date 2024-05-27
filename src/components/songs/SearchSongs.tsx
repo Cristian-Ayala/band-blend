@@ -10,7 +10,7 @@ import ListIcon from "@mui/icons-material/List";
 import SongListItem from "./SongListItem";
 import SongsInPlaylist from "../songs/SongsInPlaylist";
 
-const Search = styled("div")(({ theme }) => ({
+export const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -25,7 +25,7 @@ const Search = styled("div")(({ theme }) => ({
   },
 }));
 
-const SearchIconWrapper = styled("div")(({ theme }) => ({
+export const SearchIconWrapper = styled("div")(({ theme }) => ({
   padding: theme.spacing(0, 2),
   height: "100%",
   position: "absolute",
@@ -35,7 +35,7 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   justifyContent: "center",
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
+export const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: "inherit",
   width: "100%",
   "& .MuiInputBase-input": {
@@ -74,7 +74,7 @@ export default function SearchSongs() {
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
-              placeholder="Search…"
+              placeholder="Buscar Canciones"
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
