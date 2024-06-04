@@ -13,34 +13,46 @@ import { esES } from "@mui/x-date-pickers/locales";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/es";
 import { useEffect, useRef, useState } from "react";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import { useMutation } from "@apollo/client";
+import { ADD_SONG } from "@/store/graphql/mutations/songs";
 
 interface ScrollDialogProps {
   open: boolean;
   setOpen: (stateProp: boolean) => void;
+  refetchSongs: () => void;
 }
 
 interface SongObj {
   id: number | null;
   title: string;
   artist: string;
-  album: string;
+  album: number;
   release_date: Dayjs | null;
-  genre: string;
+  genre: number;
   duration: string | null;
   desc: string;
   lyrics: string;
   play_count: number;
 }
 
-export default function AddEditSong({ open, setOpen }: ScrollDialogProps) {
+export default function AddEditSong({
+  open,
+  setOpen,
+  refetchSongs,
+}: ScrollDialogProps) {
+  const [addSong, { loading, error }] = useMutation(ADD_SONG);
   const descriptionElementRef = useRef<HTMLElement>(null);
   const initialSongObj: SongObj = {
     id: null,
     title: "",
     artist: "",
-    album: "",
+    album: 0,
     release_date: dayjs(new Date()),
-    genre: "",
+    genre: 0,
     duration: "",
     desc: "",
     lyrics: "",
@@ -81,6 +93,26 @@ export default function AddEditSong({ open, setOpen }: ScrollDialogProps) {
     setSongObj(initialSongObj);
   };
 
+  const manageSong = () => {
+    if (songObj.id != null) return updateSong();
+    createSong();
+    handleClose();
+  };
+
+  const createSong = async () => {
+    const variables = JSON.parse(JSON.stringify(songObj));
+    delete variables.id;
+    variables.release_date = songObj.release_date?.toISOString();
+    await addSong({ variables });
+    refetchSongs();
+  };
+
+  const updateSong = () => {
+    const tmpSong = JSON.parse(JSON.stringify(songObj));
+    console.log(songObj);
+    tmpSong.release_date = songObj.release_date?.toISOString();
+    console.log(tmpSong);
+  };
   const songComponent = (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -90,7 +122,12 @@ export default function AddEditSong({ open, setOpen }: ScrollDialogProps) {
           id="song_name"
           label="Nombre de la canción"
           value={songObj.title}
-          onChange={(e) => setSongObj({ ...songObj, title: e.target.value })}
+          onChange={(e) =>
+            setSongObj({
+              ...songObj,
+              title: e.target.value.toLocaleUpperCase(),
+            })
+          }
         />
       </Grid>
       <Grid item xs={12}>
@@ -100,10 +137,15 @@ export default function AddEditSong({ open, setOpen }: ScrollDialogProps) {
           id="song_name"
           label="Nombre del artista"
           value={songObj.artist}
-          onChange={(e) => setSongObj({ ...songObj, artist: e.target.value })}
+          onChange={(e) =>
+            setSongObj({
+              ...songObj,
+              artist: e.target.value.toLocaleUpperCase(),
+            })
+          }
         />
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <TextField
           fullWidth
           id="song_album"
@@ -111,7 +153,7 @@ export default function AddEditSong({ open, setOpen }: ScrollDialogProps) {
           value={songObj.album}
           onChange={(e) => setSongObj({ ...songObj, album: e.target.value })}
         />
-      </Grid>
+      </Grid> */}
       <Grid item xs={6}>
         <LocalizationProvider
           dateAdapter={AdapterDayjs}
@@ -141,13 +183,24 @@ export default function AddEditSong({ open, setOpen }: ScrollDialogProps) {
         />
       </Grid>
       <Grid item xs={12}>
-        <TextField
-          fullWidth
-          id="song_genre"
-          label="Género"
-          value={songObj.genre}
-          onChange={(e) => setSongObj({ ...songObj, genre: e.target.value })}
-        />
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label">Género</InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="song_genre"
+            value={songObj.genre}
+            label="Género"
+            onChange={(e) =>
+              setSongObj({
+                ...songObj,
+                genre: parseInt(e.target.value as string, 10),
+              })
+            }
+          >
+            <MenuItem value={0}>Júbilo</MenuItem>
+            <MenuItem value={1}>Ministración</MenuItem>
+          </Select>
+        </FormControl>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -160,7 +213,8 @@ export default function AddEditSong({ open, setOpen }: ScrollDialogProps) {
       </Grid>
     </Grid>
   );
-
+  if (loading) return "Submitting...";
+  if (error) return `Submission error! ${error.message}`;
   return (
     <>
       <Dialog
@@ -178,7 +232,7 @@ export default function AddEditSong({ open, setOpen }: ScrollDialogProps) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleClose} disabled={!isFormValid}>
+          <Button onClick={manageSong} disabled={!isFormValid}>
             {songObj.id ? "Editar" : "Crear"}
           </Button>
         </DialogActions>

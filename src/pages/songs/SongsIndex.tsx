@@ -14,7 +14,14 @@ import SongListItemMainStyle from "@/components/songs/SongListItemMainStyle";
 
 export default function SongsIndex() {
   const [open, setOpen] = useState(false);
-  const { loading, error, data } = useQuery(GET_SONGS);
+  const {
+    loading,
+    error,
+    data,
+    refetch: refetchSongs,
+  } = useQuery(GET_SONGS, {
+    fetchPolicy: "network-only",
+  });
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error : {error.message}</p>;
   return (
@@ -52,7 +59,7 @@ export default function SongsIndex() {
           </div>
         </div>
       </div>
-      <AddEditSong open={open} setOpen={setOpen} />
+      <AddEditSong open={open} setOpen={setOpen} refetchSongs={refetchSongs} />
     </>
   );
 }
