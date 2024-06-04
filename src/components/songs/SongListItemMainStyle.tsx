@@ -1,13 +1,13 @@
+import { SongObj } from "@/components/songs/AddEditSong";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import DriveFileRenameOutlineRoundedIcon from "@mui/icons-material/DriveFileRenameOutlineRounded";
-import { SongObj } from "@/components/songs/AddEditSong";
 
 export default function songListItemMainStyle({
   song,
   handleSongSelection,
 }: {
   song: SongObj;
-  handleSongSelection: (song: SongObj) => void;
+  handleSongSelection: (song: SongObj, openEditDialog: boolean) => void;
 }) {
   return (
     <div
@@ -28,11 +28,14 @@ export default function songListItemMainStyle({
           <div className="flex items-center gap-2">
             <button
               className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10"
-              onClick={() => handleSongSelection(song)}
+              onClick={() => handleSongSelection(song, true)}
             >
               <DriveFileRenameOutlineRoundedIcon className="h-4 w-4" />
             </button>
-            <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10">
+            <button
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10"
+              onClick={() => handleSongSelection(song, false)}
+            >
               <DeleteRoundedIcon className="h-4 w-4" />
             </button>
           </div>

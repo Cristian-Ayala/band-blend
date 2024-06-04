@@ -27,8 +27,16 @@ export const ADD_SONG = gql`
 `;
 
 export const UPDATE_SONG = gql`
-  mutation UPDATE_SONG($id: Int = 10, $songObject: songs_set_input!) {
+  mutation UPDATE_SONG($id: Int!, $songObject: songs_set_input!) {
     update_songs_by_pk(pk_columns: { id: $id }, _set: $songObject) {
+      id
+    }
+  }
+`;
+
+export const DELETE_SONG = gql`
+  mutation DELETE_SONG($id: Int!) {
+    update_songs_by_pk(pk_columns: { id: $id }, _set: { visible: false }) {
       id
     }
   }

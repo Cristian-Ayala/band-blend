@@ -1,4 +1,5 @@
 import AddEditSong, { SongObj } from "@/components/songs/AddEditSong";
+import DeleteSong from "@/components/songs/DeleteSong";
 import {
   Search,
   SearchIconWrapper,
@@ -6,19 +7,22 @@ import {
 } from "@/components/songs/SearchSongs";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 
-import SearchIcon from "@mui/icons-material/Search";
-import { useState } from "react";
+import SongListItemMainStyle from "@/components/songs/SongListItemMainStyle";
 import { GET_SONGS } from "@/store/graphql/queries/songs";
 import { useQuery } from "@apollo/client";
-import SongListItemMainStyle from "@/components/songs/SongListItemMainStyle";
+import SearchIcon from "@mui/icons-material/Search";
+import { useState } from "react";
 
 export default function SongsIndex() {
   const [open, setOpen] = useState(false);
+  const [openDeleteSongDialog, setOpenDeleteSongDialog] = useState(false);
+
   const [selectedSong, setSelectedSong] = useState<SongObj | null>(null);
 
-  const handleSongSelection = (song: SongObj) => {
+  const handleSongSelection = (song: SongObj, openEditDialog: boolean) => {
     setSelectedSong(song);
-    setOpen(true);
+    if (openEditDialog) setOpen(true);
+    else setOpenDeleteSongDialog(true);
   };
 
   const {
@@ -81,6 +85,14 @@ export default function SongsIndex() {
         refetchSongs={refetchSongs}
         selectedSong={selectedSong}
       />
+      {selectedSong && (
+        <DeleteSong
+          open={openDeleteSongDialog}
+          setOpen={setOpenDeleteSongDialog}
+          refetchSongs={refetchSongs}
+          selectedSong={selectedSong}
+        />
+      )}
     </>
   );
 }
