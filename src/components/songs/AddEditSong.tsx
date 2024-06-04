@@ -18,15 +18,16 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import { useMutation } from "@apollo/client";
-import { ADD_SONG } from "@/store/graphql/mutations/songs";
+import { ADD_SONG, UPDATE_SONG } from "@/store/graphql/mutations/songs";
 
 interface ScrollDialogProps {
   open: boolean;
   setOpen: (stateProp: boolean) => void;
   refetchSongs: () => void;
+  selectedSong: SongObj | null;
 }
 
-interface SongObj {
+export interface SongObj {
   id: number | null;
   title: string;
   artist: string;
@@ -43,10 +44,16 @@ export default function AddEditSong({
   open,
   setOpen,
   refetchSongs,
+  selectedSong,
 }: ScrollDialogProps) {
   const [addSong, { loading, error }] = useMutation(ADD_SONG);
+  const [
+    updateSongHasura,
+    { loading: updateSongLoading, error: updateSongError },
+  ] = useMutation(UPDATE_SONG);
+
   const descriptionElementRef = useRef<HTMLElement>(null);
-  const initialSongObj: SongObj = {
+  const initialSongObjRef = useRef<SongObj>({
     id: null,
     title: "",
     artist: "",
@@ -57,10 +64,22 @@ export default function AddEditSong({
     desc: "",
     lyrics: "",
     play_count: 0,
-  };
-  const [songObj, setSongObj] = useState<SongObj>(initialSongObj);
+  });
 
-  const [validateEvent, setValidateEvent] = useState({
+  const [songObj, setSongObj] = useState<SongObj>(initialSongObjRef.current);
+
+  useEffect(() => {
+    if (selectedSong != null) {
+      const updatedSong = { ...selectedSong };
+      if (updatedSong.release_date != null)
+        updatedSong.release_date = dayjs(selectedSong.release_date);
+      setSongObj(updatedSong);
+    } else {
+      setSongObj(initialSongObjRef.current);
+    }
+  }, [selectedSong]);
+
+  const [validateSong, setValidateSong] = useState({
     title: true,
     artist: true,
   });
@@ -71,7 +90,7 @@ export default function AddEditSong({
     const isTitleValid = songObj.title?.trim() !== "";
     const isArtistValid = songObj.artist?.trim() !== "";
 
-    setValidateEvent({
+    setValidateSong({
       title: !isTitleValid,
       artist: !isArtistValid,
     });
@@ -90,12 +109,12 @@ export default function AddEditSong({
 
   const handleClose = () => {
     setOpen(false);
-    setSongObj(initialSongObj);
+    setSongObj(initialSongObjRef.current);
   };
 
   const manageSong = () => {
-    if (songObj.id != null) return updateSong();
-    createSong();
+    if (songObj.id != null) updateSong();
+    else createSong();
     handleClose();
   };
 
@@ -107,17 +126,25 @@ export default function AddEditSong({
     refetchSongs();
   };
 
-  const updateSong = () => {
+  const updateSong = async () => {
     const tmpSong = JSON.parse(JSON.stringify(songObj));
-    console.log(songObj);
     tmpSong.release_date = songObj.release_date?.toISOString();
-    console.log(tmpSong);
+    delete tmpSong.__typename;
+    const { id, ...songObject } = tmpSong;
+    await updateSongHasura({
+      variables: {
+        id,
+        songObject,
+      },
+    });
+    refetchSongs();
   };
+
   const songComponent = (
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
-          error={validateEvent.title}
+          error={validateSong.title}
           fullWidth
           id="song_name"
           label="Nombre de la canción"
@@ -132,7 +159,7 @@ export default function AddEditSong({
       </Grid>
       <Grid item xs={12}>
         <TextField
-          error={validateEvent.artist}
+          error={validateSong.artist}
           fullWidth
           id="song_name"
           label="Nombre del artista"
@@ -213,8 +240,9 @@ export default function AddEditSong({
       </Grid>
     </Grid>
   );
-  if (loading) return "Submitting...";
+  if (loading || updateSongLoading) return "Submitting...";
   if (error) return `Submission error! ${error.message}`;
+  if (updateSongError) return `Submission error! ${updateSongError.message}`;
   return (
     <>
       <Dialog
@@ -225,7 +253,7 @@ export default function AddEditSong({
         aria-describedby="scroll-dialog-description"
       >
         <DialogTitle id="scroll-dialog-title">
-          {songObj.id ? "Editar" : "Agregar"} evento
+          {songObj.id ? "Editar" : "Agregar"} canción
         </DialogTitle>
         <DialogContent dividers={true}>
           <Box sx={{ width: "100%" }}>{songComponent}</Box>

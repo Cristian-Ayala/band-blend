@@ -1,4 +1,4 @@
-import AddEditSong from "@/components/songs/AddEditSong";
+import AddEditSong, { SongObj } from "@/components/songs/AddEditSong";
 import {
   Search,
   SearchIconWrapper,
@@ -14,6 +14,13 @@ import SongListItemMainStyle from "@/components/songs/SongListItemMainStyle";
 
 export default function SongsIndex() {
   const [open, setOpen] = useState(false);
+  const [selectedSong, setSelectedSong] = useState<SongObj | null>(null);
+
+  const handleSongSelection = (song: SongObj) => {
+    setSelectedSong(song);
+    setOpen(true);
+  };
+
   const {
     loading,
     error,
@@ -36,7 +43,10 @@ export default function SongsIndex() {
 
               <button
                 className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3"
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                  setSelectedSong(null);
+                  setOpen(true);
+                }}
               >
                 <AddRoundedIcon className="mr-2 h-4 w-4" />
                 Agregar Canción
@@ -54,12 +64,23 @@ export default function SongsIndex() {
               </Search>
             </div>
             <div className="grid gap-4">
-              {data.songs.map(SongListItemMainStyle)}
+              {data.songs.map((song: SongObj) => (
+                <SongListItemMainStyle
+                  key={song.id}
+                  song={song}
+                  handleSongSelection={handleSongSelection}
+                />
+              ))}
             </div>
           </div>
         </div>
       </div>
-      <AddEditSong open={open} setOpen={setOpen} refetchSongs={refetchSongs} />
+      <AddEditSong
+        open={open}
+        setOpen={setOpen}
+        refetchSongs={refetchSongs}
+        selectedSong={selectedSong}
+      />
     </>
   );
 }

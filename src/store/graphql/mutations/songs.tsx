@@ -25,3 +25,11 @@ export const ADD_SONG = gql`
     }
   }
 `;
+
+export const UPDATE_SONG = gql`
+  mutation UPDATE_SONG($id: Int = 10, $songObject: songs_set_input!) {
+    update_songs_by_pk(pk_columns: { id: $id }, _set: $songObject) {
+      id
+    }
+  }
+`;
