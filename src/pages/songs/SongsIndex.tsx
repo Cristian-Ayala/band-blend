@@ -10,9 +10,9 @@ import { GET_SONGS } from "@/store/graphql/queries/songs";
 import { useQuery } from "@apollo/client";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchIcon from "@mui/icons-material/Search";
+import Pagination from "@mui/material/Pagination";
+import React, { useCallback, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { useState, useCallback } from "react";
-
 
 export default function SongsIndex() {
   const [open, setOpen] = useState(false);
@@ -22,11 +22,21 @@ export default function SongsIndex() {
 
   const [selectedSong, setSelectedSong] = useState<SongObj | null>(null);
 
-  const handleSongSelection = useCallback((song: SongObj, openEditDialog: boolean) => {
-    setSelectedSong(song);
-    if (openEditDialog) setOpen(true);
-    else setOpenDeleteSongDialog(true);
-  }, []);
+  const handleSongSelection = useCallback(
+    (song: SongObj, openEditDialog: boolean) => {
+      setSelectedSong(song);
+      if (openEditDialog) setOpen(true);
+      else setOpenDeleteSongDialog(true);
+    },
+    [],
+  );
+
+  const [page, setPage] = useState(1);
+  const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
+  const LIMIT = 5;
 
   const {
     loading,
@@ -37,13 +47,18 @@ export default function SongsIndex() {
     fetchPolicy: "network-only",
     variables: {
       searchKeyword: `%${debouncedText}%`,
+      offset: (page - 1) * LIMIT,
+      limit: LIMIT,
     },
   });
 
-  const onChangeSearchInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toLocaleUpperCase();
-    setSearchKeyword(value);
-  }, []);
+  const onChangeSearchInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.toLocaleUpperCase();
+      setSearchKeyword(value);
+    },
+    [],
+  );
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error : {error.message}</p>;
@@ -90,6 +105,17 @@ export default function SongsIndex() {
                   handleSongSelection={handleSongSelection}
                 />
               ))}
+              <Pagination
+                count={Math.ceil(data.totalSongs?.aggregate?.count / LIMIT)}
+                page={page}
+                siblingCount={0}
+                variant="outlined"
+                shape="rounded"
+                size="small"
+                className="w-full flex items-center justify-center"
+                onChange={handleChange}
+              />
+              <h6 className="text-sm text-gray-500 dark:text-gray-400 text-center">{data.totalSongs?.aggregate?.count} {data.totalSongs?.aggregate?.count === 1 ? "Cancion": "Canciones"}</h6>
             </div>
           </div>
         </div>
