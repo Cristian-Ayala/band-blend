@@ -5,25 +5,28 @@ import {
   SearchIconWrapper,
   StyledInputBase,
 } from "@/components/songs/SearchSongs";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-
 import SongListItemMainStyle from "@/components/songs/SongListItemMainStyle";
 import { GET_SONGS } from "@/store/graphql/queries/songs";
 import { useQuery } from "@apollo/client";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchIcon from "@mui/icons-material/Search";
-import { useState } from "react";
+import { useDebounce } from "use-debounce";
+import { useState, useCallback } from "react";
+
 
 export default function SongsIndex() {
   const [open, setOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [debouncedText] = useDebounce(searchKeyword, 1000);
   const [openDeleteSongDialog, setOpenDeleteSongDialog] = useState(false);
 
   const [selectedSong, setSelectedSong] = useState<SongObj | null>(null);
 
-  const handleSongSelection = (song: SongObj, openEditDialog: boolean) => {
+  const handleSongSelection = useCallback((song: SongObj, openEditDialog: boolean) => {
     setSelectedSong(song);
     if (openEditDialog) setOpen(true);
     else setOpenDeleteSongDialog(true);
-  };
+  }, []);
 
   const {
     loading,
@@ -32,9 +35,19 @@ export default function SongsIndex() {
     refetch: refetchSongs,
   } = useQuery(GET_SONGS, {
     fetchPolicy: "network-only",
+    variables: {
+      searchKeyword: `%${debouncedText}%`,
+    },
   });
+
+  const onChangeSearchInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLocaleUpperCase();
+    setSearchKeyword(value);
+  }, []);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error : {error.message}</p>;
+
   return (
     <>
       <div className="p-5">
@@ -64,6 +77,8 @@ export default function SongsIndex() {
                 <StyledInputBase
                   placeholder="Buscar Canciones"
                   inputProps={{ "aria-label": "search" }}
+                  value={searchKeyword}
+                  onChange={onChangeSearchInput}
                 />
               </Search>
             </div>
