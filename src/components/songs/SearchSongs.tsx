@@ -1,14 +1,20 @@
-import Grid from "@mui/material/Grid";
-import SearchIcon from "@mui/icons-material/Search";
-import { styled, alpha } from "@mui/material/styles";
-import InputBase from "@mui/material/InputBase";
-import Stack from "@mui/material/Stack";
-import IconButton from "@mui/material/IconButton";
-import Pagination from "@mui/material/Pagination";
-import React, { useState } from "react";
+import { SongObj } from "@/components/songs/AddEditSong";
+import { GET_SONGS } from "@/store/graphql/queries/songs";
+import { useLazyQuery } from "@apollo/client";
+import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import ListIcon from "@mui/icons-material/List";
-import SongListItem from "./SongListItem";
+import SearchIcon from "@mui/icons-material/Search";
+import { Icon } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import InputBase from "@mui/material/InputBase";
+import Pagination from "@mui/material/Pagination";
+import Stack from "@mui/material/Stack";
+import { alpha, styled } from "@mui/material/styles";
+import React, { useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import SongsInPlaylist from "../songs/SongsInPlaylist";
+import SongListItem from "./SongListItem";
 
 export const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -52,15 +58,56 @@ export const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+export interface SongsCollection {
+  [key: number]: SongObj;
+}
+
 export default function SearchSongs() {
   const [showListSongs, setShowListSongs] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [songsEvent, setSongsEvent] = useState<SongsCollection>({});
 
+  const [page, setPage] = useState(1);
+  const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
+  const LIMIT = 5;
+  const [getSong, { loading, error, data }] = useLazyQuery(GET_SONGS, {
+    fetchPolicy: "network-only",
+    variables: {
+      searchKeyword: `%${searchKeyword}%`,
+      offset: (page - 1) * LIMIT,
+      limit: LIMIT,
+    },
+  });
+
+  const debouncedGetSong = useDebouncedCallback(() => {
+    getSong();
+  }, 1000);
+
+  const onChangeSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toLocaleUpperCase();
+    setSearchKeyword(value);
+    debouncedGetSong();
+  };
   const handleClickShowListSongs = () => setShowListSongs((show) => !show);
-  const handleMouseDownPassword = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  const handlePreventDefault = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
   };
+
+  const mutateSongCollection = (song: SongObj) => {
+    if (song.id == null) return;
+    const songs = {
+      ...songsEvent,
+    };
+    if (Object.prototype.hasOwnProperty.call(songs, song.id))
+      delete songs[song.id];
+    else songs[song.id] = song;
+    setSongsEvent(songs);
+  };
+
+  if (error) return <p>Error : {error.message}</p>;
 
   return (
     <>
@@ -76,6 +123,8 @@ export default function SearchSongs() {
             <StyledInputBase
               placeholder="Buscar Canciones"
               inputProps={{ "aria-label": "search" }}
+              value={searchKeyword}
+              onChange={onChangeSearchInput}
             />
           </Search>
         </Grid>
@@ -83,28 +132,54 @@ export default function SearchSongs() {
           <IconButton
             aria-label="toggle"
             onClick={handleClickShowListSongs}
-            onMouseDown={handleMouseDownPassword}
+            onMouseDown={handlePreventDefault}
+            disabled={songsEvent == null || Object.keys(songsEvent).length == 0}
           >
             <ListIcon />
           </IconButton>
         </Grid>
         <Grid item xs={12}>
-          <SongListItem />
+          {loading || !data ? (
+            <div className="w-full flex flex-col items-center justify-center">
+              <Icon component={LibraryMusicIcon} sx={{ fontSize: 60 }} />
+              {loading ? <h6>Buscando Canción</h6> : <h6>Busca una Canción</h6>}
+            </div>
+          ) : (
+            data.songs.map((song: SongObj) => (
+              <SongListItem
+                key={song.id}
+                song={song}
+                songsEvent={songsEvent}
+                mutateSongCollection={mutateSongCollection}
+              />
+            ))
+          )}
         </Grid>
-        <Grid item xs={12}>
-          <Stack spacing={2}>
-            <Pagination
-              count={10}
-              siblingCount={0}
-              variant="outlined"
-              shape="rounded"
-              size="small"
-              className="w-full flex items-center justify-center"
-            />
-          </Stack>
-        </Grid>
+        {data && data.totalSongs && data.totalSongs.aggregate.count > LIMIT ? (
+          <Grid item xs={12}>
+            <Stack spacing={2}>
+              <Pagination
+                count={Math.ceil(data.totalSongs.aggregate.count / LIMIT)}
+                page={page}
+                siblingCount={0}
+                variant="outlined"
+                shape="rounded"
+                size="small"
+                className="w-full flex items-center justify-center"
+                onChange={handleChange}
+              />
+            </Stack>
+          </Grid>
+        ) : (
+          ""
+        )}
       </Grid>
-      <SongsInPlaylist open={showListSongs} handleClose={handleClickShowListSongs} />
+      <SongsInPlaylist
+        open={showListSongs}
+        handleClose={handleClickShowListSongs}
+        mutateSongCollection={mutateSongCollection}
+        songsEvent={songsEvent}
+      />
     </>
   );
 }

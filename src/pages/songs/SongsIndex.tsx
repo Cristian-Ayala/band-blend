@@ -37,7 +37,6 @@ export default function SongsIndex() {
   };
 
   const LIMIT = 5;
-
   const {
     loading,
     error,
@@ -115,7 +114,12 @@ export default function SongsIndex() {
                 className="w-full flex items-center justify-center"
                 onChange={handleChange}
               />
-              <h6 className="text-sm text-gray-500 dark:text-gray-400 text-center">{data.totalSongs?.aggregate?.count} {data.totalSongs?.aggregate?.count === 1 ? "Cancion": "Canciones"}</h6>
+              <h6 className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                {data.totalSongs?.aggregate?.count}{" "}
+                {data.totalSongs?.aggregate?.count === 1
+                  ? "Cancion"
+                  : "Canciones"}
+              </h6>
             </div>
           </div>
         </div>

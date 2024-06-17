@@ -1,12 +1,14 @@
+import { SongObj } from "@/components/songs/AddEditSong";
+import { SongsCollection } from "@/components/songs/SearchSongs";
+import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import Button from "@mui/material/Button";
-import SongListItem from "./SongListItem";
+import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import * as React from "react";
-import Slide from "@mui/material/Slide";
+import SongListItem from "./SongListItem";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -18,12 +20,16 @@ const Transition = React.forwardRef(function Transition(
 });
 
 interface songsInPlaylistProps {
+  songsEvent: SongsCollection;
   open: boolean;
   handleClose: () => void;
+  mutateSongCollection: (song: SongObj) => void;
 }
 export default function SongsInPlaylist({
+  songsEvent,
   open,
   handleClose,
+  mutateSongCollection,
 }: songsInPlaylistProps) {
   return (
     <Dialog
@@ -38,7 +44,14 @@ export default function SongsInPlaylist({
     >
       <DialogTitle id="songs-in-playlist">Canciones agregadas</DialogTitle>
       <DialogContent dividers={true}>
-        <SongListItem isAdded={true} />
+        {Object.values(songsEvent).map((song) => (
+          <SongListItem
+            key={song.id}
+            song={song}
+            songsEvent={songsEvent}
+            mutateSongCollection={mutateSongCollection}
+          />
+        ))}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancelar</Button>
