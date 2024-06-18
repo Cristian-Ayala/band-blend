@@ -1,6 +1,6 @@
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import { useState } from "react";
 import DriveFileRenameOutlineRoundedIcon from "@mui/icons-material/DriveFileRenameOutlineRounded";
+import { useState } from "react";
 import AddEditEvents from "./AddEditEvents.tsx";
 
 export default function Events() {

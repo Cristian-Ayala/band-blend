@@ -1,6 +1,8 @@
 import { SongObj } from "@/components/songs/AddEditSong";
+import { reorder } from "@/plugins/helpers";
 import { GET_SONGS } from "@/store/graphql/queries/songs";
 import { useLazyQuery } from "@apollo/client";
+import { DropResult } from "@hello-pangea/dnd";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import ListIcon from "@mui/icons-material/List";
 import SearchIcon from "@mui/icons-material/Search";
@@ -66,6 +68,7 @@ export default function SearchSongs() {
   const [showListSongs, setShowListSongs] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [songsEvent, setSongsEvent] = useState<SongsCollection>({});
+  const [songsEventArray, setSongsEventArray] = useState<SongObj[]>([]);
 
   const [page, setPage] = useState(1);
   const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
@@ -101,10 +104,21 @@ export default function SearchSongs() {
     const songs = {
       ...songsEvent,
     };
-    if (Object.prototype.hasOwnProperty.call(songs, song.id))
+    if (Object.prototype.hasOwnProperty.call(songs, song.id)) {
       delete songs[song.id];
-    else songs[song.id] = song;
+      songsEventArray.splice(songsEventArray.findIndex(tmpSong => tmpSong.id === song.id), 1);
+    } else {
+      songs[song.id] = song;
+      songsEventArray.push(song);
+    }
     setSongsEvent(songs);
+  };
+
+  const onDragEnd = ({ destination, source }: DropResult) => {
+    // dropped outside the list
+    if (!destination) return;
+    const newItems = reorder(songsEventArray, source.index, destination.index);
+    setSongsEventArray(newItems);
   };
 
   if (error) return <p>Error : {error.message}</p>;
@@ -179,6 +193,8 @@ export default function SearchSongs() {
         handleClose={handleClickShowListSongs}
         mutateSongCollection={mutateSongCollection}
         songsEvent={songsEvent}
+        songsEventArray={songsEventArray}
+        onDragEnd={onDragEnd}
       />
     </>
   );
