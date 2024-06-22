@@ -1,10 +1,35 @@
+import { GET_EVENTS } from "@/store/graphql/queries/events";
+import { useQuery } from "@apollo/client";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DriveFileRenameOutlineRoundedIcon from "@mui/icons-material/DriveFileRenameOutlineRounded";
+import Pagination from "@mui/material/Pagination";
 import { useState } from "react";
 import AddEditEvents from "./AddEditEvents.tsx";
+import EventListItem, {localEventObj} from "./EventListItem.tsx";
 
 export default function Events() {
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const LIMIT = 5;
+  const {
+    loading,
+    error,
+    data: eventData,
+    refetch: refetchEvents,
+  } = useQuery(GET_EVENTS, {
+    fetchPolicy: "network-only",
+    variables: {
+      offset: (page - 1) * LIMIT,
+      limit: LIMIT,
+    },
+  });
+
+  const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error : {error.message}</p>;
 
   return (
     <div className="grid gap-4">
@@ -21,107 +46,25 @@ export default function Events() {
         </button>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div
-          className="rounded-lg border bg-card text-card-foreground shadow-sm"
-          data-v0-t="card"
-        >
-          <div className="p-6 grid gap-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
-                Service 1
-              </h3>
-              <div className="inline-flex w-fit items-center whitespace-nowrap border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground rounded-full px-3 py-1 text-xs">
-                Sunday
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  9:00 AM - 10:30 AM
-                </p>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10">
-                  <DriveFileRenameOutlineRoundedIcon className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Sanctuary
-                </p>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10">
-                  <DriveFileRenameOutlineRoundedIcon className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="rounded-lg border bg-card text-card-foreground shadow-sm"
-          data-v0-t="card"
-        >
-          <div className="p-6 grid gap-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
-                Service 2
-              </h3>
-              <div className="inline-flex w-fit items-center whitespace-nowrap border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground rounded-full px-3 py-1 text-xs">
-                Sunday
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  11:00 AM - 12:30 PM
-                </p>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10">
-                  <DriveFileRenameOutlineRoundedIcon className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Sanctuary
-                </p>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10">
-                  <DriveFileRenameOutlineRoundedIcon className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="rounded-lg border bg-card text-card-foreground shadow-sm"
-          data-v0-t="card"
-        >
-          <div className="p-6 grid gap-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
-                Youth Group
-              </h3>
-              <div className="inline-flex w-fit items-center whitespace-nowrap border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground rounded-full px-3 py-1 text-xs">
-                Friday
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  7:00 PM - 9:00 PM
-                </p>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10">
-                  <DriveFileRenameOutlineRoundedIcon className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Youth Room
-                </p>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10">
-                  <DriveFileRenameOutlineRoundedIcon className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {eventData?.events?.map((event: localEventObj) => (
+          <EventListItem key={event.id} {...event} />
+        ))}
+        <Pagination
+          count={Math.ceil(eventData.totalEvents?.aggregate?.count / LIMIT)}
+          page={page}
+          siblingCount={0}
+          variant="outlined"
+          shape="rounded"
+          size="small"
+          className="w-full flex items-center justify-center"
+          onChange={handleChange}
+        />
       </div>
-      <AddEditEvents open={open} setOpen={setOpen} />
+      <AddEditEvents
+        open={open}
+        setOpen={setOpen}
+        refetchEvents={refetchEvents}
+      />
     </div>
   );
 }

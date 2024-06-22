@@ -15,7 +15,7 @@ export default function songListItemMainStyle({
       data-v0-t="card"
       key={song.id}
     >
-      <div className="p-6 grid gap-4">
+      <div className="p-3 grid gap-4">
         <div className="flex items-center justify-between">
           <div className="grid gap-1">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">

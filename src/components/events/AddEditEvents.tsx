@@ -27,6 +27,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 interface ScrollDialogProps {
   open: boolean;
   setOpen: (stateProp: boolean) => void;
+  refetchEvents: () => void;
 }
 
 interface EventObj {
@@ -38,7 +39,7 @@ interface EventObj {
 }
 
 const steps = ["Información del evento", "Agrega las canciones"];
-export default function ScrollDialog({ open, setOpen }: ScrollDialogProps) {
+export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDialogProps) {
   const descriptionElementRef = useRef<HTMLElement>(null);
   const initialEventObj: EventObj = {
     id: null,
@@ -165,6 +166,7 @@ export default function ScrollDialog({ open, setOpen }: ScrollDialogProps) {
       window.console.error(error);
     } finally {
       setSongsEventArray([]);
+      refetchEvents();
       handleClose();
     }
   };

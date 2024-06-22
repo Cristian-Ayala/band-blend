@@ -30,3 +30,38 @@ export function getTimeFromDate(dateString: string) {
   const formattedTime = formatter.format(date);
   return formattedTime;
 }
+
+export const getLongDateFromStringDate = (dateString: string): string => {
+  const date = new Date(dateString);
+
+  // Handle invalid date
+  if (isNaN(date.getTime())) {
+    return "Fecha inválida";
+  }
+
+  // Use toLocaleString to format the entire date
+  const formattedDate = date.toLocaleString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1); // Capitalize the first letter
+};
+
+export const getHourFromStringTime = (timeString: string): string => {
+  const [hourString, minute] = timeString.split(":");
+  const hour = parseInt(hourString, 10);
+
+  // Determine if it's AM or PM
+  const period = hour >= 12 ? "PM" : "AM";
+
+  // Convert hour from 24-hour to 12-hour format
+  const hour12 = hour % 12 || 12;
+
+  // Pad single digit hour with leading zero if needed (optional)
+  const hour12String = hour12 < 10 ? `0${hour12}` : `${hour12}`;
+
+  return `${hour12String}:${minute} ${period}`;
+};
