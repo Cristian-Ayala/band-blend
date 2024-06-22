@@ -13,7 +13,7 @@ import InputBase from "@mui/material/InputBase";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import { alpha, styled } from "@mui/material/styles";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import SongsInPlaylist from "../songs/SongsInPlaylist";
 import SongListItem from "./SongListItem";
@@ -64,11 +64,16 @@ export interface SongsCollection {
   [key: number]: SongObj;
 }
 
-export default function SearchSongs() {
+export default function SearchSongs({
+  songsEventArray,
+  setSongsEventArray,
+}: {
+  songsEventArray: SongObj[];
+  setSongsEventArray: React.Dispatch<React.SetStateAction<SongObj[]>>;
+}) {
   const [showListSongs, setShowListSongs] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [songsEvent, setSongsEvent] = useState<SongsCollection>({});
-  const [songsEventArray, setSongsEventArray] = useState<SongObj[]>([]);
 
   const [page, setPage] = useState(1);
   const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
@@ -106,7 +111,10 @@ export default function SearchSongs() {
     };
     if (Object.prototype.hasOwnProperty.call(songs, song.id)) {
       delete songs[song.id];
-      songsEventArray.splice(songsEventArray.findIndex(tmpSong => tmpSong.id === song.id), 1);
+      songsEventArray.splice(
+        songsEventArray.findIndex((tmpSong) => tmpSong.id === song.id),
+        1,
+      );
     } else {
       songs[song.id] = song;
       songsEventArray.push(song);
@@ -120,6 +128,22 @@ export default function SearchSongs() {
     const newItems = reorder(songsEventArray, source.index, destination.index);
     setSongsEventArray(newItems);
   };
+
+  useEffect(() => {
+    // Code to run after the component is mounted
+    const songs = songsEventArray.reduce<Record<number, SongObj>>(
+      (acc, song: SongObj) => {
+        if (song != null && song.id != null) acc[song.id] = song;
+        return acc;
+      },
+      {},
+    );
+    setSongsEvent(songs);
+    return () => {
+      setSongsEvent({});
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (error) return <p>Error : {error.message}</p>;
 

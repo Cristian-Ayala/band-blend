@@ -41,3 +41,19 @@ export const DELETE_SONG = gql`
     }
   }
 `;
+
+export const UPDATE_LAST_TIME_PLAYED_SONG = gql`
+  mutation UPDATE_LAST_TIME_PLAYED_SONG(
+    $last_time_played: timestamptz!
+    $_in: [Int!]!
+  ) {
+    update_songs(
+      where: { id: { _in: $_in } }
+      _set: { last_time_played: $last_time_played }
+    ) {
+      returning {
+        id
+      }
+    }
+  }
+`;

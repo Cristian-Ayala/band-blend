@@ -20,6 +20,7 @@ export const GET_SONGS = gql`
       desc
       artist
       album
+      last_time_played
     }
     totalSongs: songs_aggregate(
       where: { visible: { _eq: true }, title: { _ilike: $searchKeyword } }

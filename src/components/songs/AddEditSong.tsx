@@ -38,6 +38,7 @@ export interface SongObj {
   desc: string;
   lyrics: string;
   play_count: number;
+  last_time_played: string | null;
 }
 
 export default function AddEditSong({
@@ -64,6 +65,7 @@ export default function AddEditSong({
     desc: "",
     lyrics: "",
     play_count: 0,
+    last_time_played: "",
   });
 
   const [songObj, setSongObj] = useState<SongObj>(initialSongObjRef.current);

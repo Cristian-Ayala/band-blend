@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "types": ["lodash"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ],
+    "types": ["lodash", "node"],
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
