@@ -129,6 +129,7 @@ export default function SongsIndex() {
         setOpen={setOpen}
         refetchSongs={refetchSongs}
         selectedSong={selectedSong}
+        setSelectedSong={setSelectedSong}
       />
       {selectedSong && (
         <DeleteSong

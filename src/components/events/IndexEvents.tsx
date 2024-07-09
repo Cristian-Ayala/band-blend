@@ -1,14 +1,20 @@
-import { GET_EVENTS } from "@/store/graphql/queries/events";
-import { useQuery } from "@apollo/client";
+import { GET_EVENTS, GET_EVENT_SONGS } from "@/store/graphql/queries/events";
+import { useLazyQuery, useQuery } from "@apollo/client";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import Pagination from "@mui/material/Pagination";
-import { useState } from "react";
-import AddEditEvents from "./AddEditEvents.tsx";
-import EventListItem, {localEventObj} from "./EventListItem.tsx";
+import { useCallback, useMemo, useState } from "react";
+import AddEditEvents, { EventSongColection } from "./AddEditEvents.tsx";
+import EventListItem, { localEventObj } from "./EventListItem.tsx";
 
 export default function Events() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [selectedEvent, setSelectedEvent] = useState<localEventObj | null>(
+    null,
+  );
+  const [eventSongsSelected, setEventSongsSelected] = useState<
+    EventSongColection[]
+  >([]);
 
   const LIMIT = 5;
   const {
@@ -23,6 +29,34 @@ export default function Events() {
       limit: LIMIT,
     },
   });
+
+  const [getEventSongs] = useLazyQuery(GET_EVENT_SONGS);
+
+  const numberOfPages = useMemo(() => {
+    if (!eventData || eventData.totalEvents == null) return 0;
+    return Math.ceil(eventData.totalEvents?.aggregate?.count / LIMIT);
+  }, [eventData]);
+
+  const handleEventSelection = useCallback(
+    async (event: localEventObj, openEditDialog: boolean) => {
+      let eventSongRes = null;
+      setSelectedEvent(event);
+      if (openEditDialog) {
+        if (event && event.id != null) {
+          eventSongRes = await getEventSongs({
+            fetchPolicy: "network-only",
+            variables: {
+              event_id: event?.id || 0,
+            },
+          });
+          setEventSongsSelected(eventSongRes?.data?.event_songs || []);
+        }
+        setOpen(true);
+      }
+      // else setOpenDeleteSongDialog(true);
+    },
+    [getEventSongs],
+  );
 
   const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -39,7 +73,9 @@ export default function Events() {
         </h1>
         <button
           className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+          }}
         >
           <AddRoundedIcon className="mr-2 h-4 w-4" />
           Crear Evento
@@ -47,10 +83,14 @@ export default function Events() {
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {eventData?.events?.map((event: localEventObj) => (
-          <EventListItem key={event.id} {...event} />
+          <EventListItem
+            key={event.id}
+            event={event}
+            handleEventSelection={handleEventSelection}
+          />
         ))}
         <Pagination
-          count={Math.ceil(eventData.totalEvents?.aggregate?.count / LIMIT)}
+          count={numberOfPages}
           page={page}
           siblingCount={0}
           variant="outlined"
@@ -58,12 +98,17 @@ export default function Events() {
           size="small"
           className="w-full flex items-center justify-center"
           onChange={handleChange}
+          sx={{ ...(numberOfPages <= 1 && { display: "none" }) }}
         />
       </div>
       <AddEditEvents
         open={open}
         setOpen={setOpen}
         refetchEvents={refetchEvents}
+        selectedEvent={selectedEvent}
+        setSelectedEvent={setSelectedEvent}
+        eventSongsSelected={eventSongsSelected}
+        setEventSongsSelected={setEventSongsSelected}
       />
     </div>
   );

@@ -25,6 +25,7 @@ interface ScrollDialogProps {
   setOpen: (stateProp: boolean) => void;
   refetchSongs: () => void;
   selectedSong: SongObj | null;
+  setSelectedSong: (song: SongObj | null) => void;
 }
 
 export interface SongObj {
@@ -46,6 +47,7 @@ export default function AddEditSong({
   setOpen,
   refetchSongs,
   selectedSong,
+  setSelectedSong,
 }: ScrollDialogProps) {
   const [addSong, { loading, error }] = useMutation(ADD_SONG);
   const [
@@ -112,6 +114,7 @@ export default function AddEditSong({
   const handleClose = () => {
     setOpen(false);
     setSongObj(initialSongObjRef.current);
+    setSelectedSong(null);
   };
 
   const manageSong = () => {

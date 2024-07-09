@@ -78,7 +78,7 @@ const SongsInPlaylist = ({
         </DragDropContext>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancelar</Button>
+        <Button onClick={handleClose}>Cerrar</Button>
       </DialogActions>
     </Dialog>
   );

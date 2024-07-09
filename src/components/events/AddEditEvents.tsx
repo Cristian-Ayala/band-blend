@@ -1,8 +1,16 @@
 import { SongObj } from "@/components/songs/AddEditSong";
 import SearchSongs from "@/components/songs/SearchSongs.tsx";
 import { getTimeFromDate } from "@/plugins/helpers";
-import { ADD_EVENT_SONG, MUTATE_EVENT } from "@/store/graphql/mutations/events";
-import { UPDATE_LAST_TIME_PLAYED_SONG } from "@/store/graphql/mutations/songs";
+import {
+  ADD_EVENT_SONG,
+  CLOSE_EVENT,
+  MUTATE_EVENT,
+  UPDATE_ORDER_EVENT_SONG,
+} from "@/store/graphql/mutations/events";
+import {
+  INCREMENT_PLAY_COUNT,
+  UPDATE_LAST_TIME_PLAYED_SONG,
+} from "@/store/graphql/mutations/songs";
 import { useMutation } from "@apollo/client";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -23,11 +31,25 @@ import { esES } from "@mui/x-date-pickers/locales";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/es";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { localEventObj } from "./EventListItem.tsx";
+
+interface EventSong {
+  event_id: number | null;
+  song_id: number | null;
+  order: number;
+}
+export interface EventSongColection extends EventSong {
+  song: SongObj;
+}
 
 interface ScrollDialogProps {
   open: boolean;
   setOpen: (stateProp: boolean) => void;
   refetchEvents: () => void;
+  selectedEvent: localEventObj | null;
+  setSelectedEvent: (event: localEventObj | null) => void;
+  eventSongsSelected: EventSongColection[];
+  setEventSongsSelected: (songs: EventSongColection[]) => void;
 }
 
 interface EventObj {
@@ -39,16 +61,26 @@ interface EventObj {
 }
 
 const steps = ["Información del evento", "Agrega las canciones"];
-export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDialogProps) {
+export default function ScrollDialog({
+  open,
+  setOpen,
+  refetchEvents,
+  selectedEvent,
+  setSelectedEvent,
+  eventSongsSelected,
+  setEventSongsSelected,
+}: ScrollDialogProps) {
   const descriptionElementRef = useRef<HTMLElement>(null);
-  const initialEventObj: EventObj = {
+  const initialEventObjRef = useRef<EventObj>({
     id: null,
     name: "",
     date: dayjs(new Date()),
     hour: null,
     desc: "",
-  };
-  const [eventObj, setEventObj] = useState<EventObj>(initialEventObj);
+  });
+  const [eventObj, setEventObj] = useState<EventObj>(
+    initialEventObjRef.current,
+  );
   const [songsEventArray, setSongsEventArray] = useState<SongObj[]>([]);
 
   const [validateEvent, setValidateEvent] = useState({
@@ -59,6 +91,36 @@ export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDia
 
   const [isFormValid, setIsFormValid] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    if (selectedEvent != null) {
+      const updatedEvent: EventObj = {
+        ...selectedEvent,
+        date:
+          typeof selectedEvent.date === "string"
+            ? dayjs(selectedEvent.date)
+            : selectedEvent.date,
+        hour:
+          typeof selectedEvent.hour === "string"
+            ? dayjs(new Date(`2024-01-01T${selectedEvent.hour.split("+")[0]}`))
+            : selectedEvent.hour,
+        desc: selectedEvent.desc ?? "",
+      };
+      setEventObj(updatedEvent);
+      if (
+        !eventSongsSelected ||
+        !Array.isArray(eventSongsSelected) ||
+        eventSongsSelected.length === 0
+      )
+        return;
+      const mappedSongs = eventSongsSelected.map(({ song }) => ({
+        ...song,
+      }));
+      setSongsEventArray(mappedSongs);
+    } else {
+      setEventObj(initialEventObjRef.current);
+    }
+  }, [selectedEvent, eventSongsSelected]);
 
   useEffect(() => {
     const isNameValid = eventObj.name?.trim() !== "";
@@ -94,12 +156,17 @@ export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDia
     )
       return false;
     // Join date and hour to compare with current date and hour
-    return true;
+    const eventDate = eventObj.date.toISOString().split("T")[0];
+    const eventHour = eventObj.hour.toISOString().split("T")[1];
+    return dayjs().isAfter(dayjs(`${eventDate}T${eventHour}`));
   }, [eventObj]);
   const handleClose = () => {
     setOpen(false);
-    setEventObj(initialEventObj);
+    setEventObj(initialEventObjRef.current);
     setActiveStep(0);
+    setSelectedEvent(null);
+    setEventSongsSelected([]);
+    setSongsEventArray([]);
   };
 
   const handleNext = () => {
@@ -111,22 +178,25 @@ export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDia
   };
 
   const [mutateEvent, { loading, error }] = useMutation(MUTATE_EVENT);
+  const [mutateCloseEvent, { loading: loadingClose, error: errorClose }] =
+    useMutation(CLOSE_EVENT);
+
   const [addEventSong, { loading: loadingEventSong, error: errorEventSong }] =
     useMutation(ADD_EVENT_SONG);
+
+  const [editOrderEventSong] = useMutation(UPDATE_ORDER_EVENT_SONG);
+  const [incrementPlayedSong] = useMutation(INCREMENT_PLAY_COUNT);
+  INCREMENT_PLAY_COUNT;
 
   const [
     updateLastTimePlayedSong,
     { loading: loadingLastTime, error: errorUpdateLastTime },
   ] = useMutation(UPDATE_LAST_TIME_PLAYED_SONG);
 
-  interface EventSong {
-    event_id: number | null;
-    song_id: number | null;
-    order: number;
-  }
   const handleMutateEvent = async () => {
     try {
       const eventObjTmp = JSON.parse(JSON.stringify(eventObj));
+      delete eventObjTmp.__typename;
       if (eventObj.id == null) delete eventObjTmp.id;
       eventObjTmp.hour = getTimeFromDate(eventObjTmp.hour);
       const resEvent = await mutateEvent({
@@ -143,25 +213,40 @@ export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDia
         throw new Error("Mutation of event response is null");
       const eventId = resEvent.data.insert_events_one.id;
       if (songsEventArray == null || !songsEventArray.length) return;
-      const songsEvent: EventSong[] = songsEventArray.reduce(
-        (acc: EventSong[], song: SongObj, index: number) => {
-          acc.push({
-            event_id: eventId,
-            song_id: song.id,
-            order: index + 1,
-          });
-          return acc;
-        },
-        [],
+      const [newSongs, existingSongs]: [EventSong[], EventSong[]] =
+        songsEventArray.reduce(
+          (acc: [EventSong[], EventSong[]], song: SongObj, index: number) => {
+            const evntSng = {
+              event_id: eventId,
+              song_id: song.id,
+              order: index + 1,
+            };
+            if (Object.prototype.hasOwnProperty.call(song, "__new_song")) {
+              // New song
+              acc[0].push(evntSng);
+            } else {
+              // Existing song
+              acc[1].push(evntSng);
+            }
+            return acc;
+          },
+          [[], []],
+        );
+      if (newSongs.length > 0) {
+        await addEventSong({
+          variables: {
+            objects: newSongs,
+          },
+        });
+      }
+      const promiseEventSongOrderUpdate = existingSongs.map((eventSong) =>
+        editOrderEventSong({
+          variables: {
+            ...eventSong,
+          },
+        }),
       );
-
-      const resEventSong = await addEventSong({
-        variables: {
-          objects: songsEvent,
-        },
-      });
-      if (resEventSong == null || resEventSong.data == null)
-        throw new Error("Mutation of event songs response is null");
+      await Promise.all(promiseEventSongOrderUpdate);
     } catch (error) {
       window.console.error(error);
     } finally {
@@ -172,16 +257,38 @@ export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDia
   };
 
   const handleCloseEvent = async () => {
-    const eventObjTmp = JSON.parse(JSON.stringify(eventObj));
-    // MUTATE EVENT: status --> closed
-    const songsID = songsEventArray.map((song) => song.id);
-    await updateLastTimePlayedSong({
-      variables: {
-        _in: songsID,
-        last_time_played: eventObjTmp.date,
-      },
-    });
-    handleClose();
+    try {
+      const eventObjTmp = JSON.parse(JSON.stringify(eventObj));
+      const resEvent = await mutateCloseEvent({
+        variables: {
+          id: eventObjTmp.id,
+        },
+      });
+      if (resEvent == null || resEvent.data == null) return;
+      const songsID = songsEventArray.reduce<number[]>((acc, song) => {
+        if (
+          song.id != null &&
+          (dayjs(eventObjTmp.date).isAfter(dayjs(song.last_time_played)) ||
+            song.last_time_played == null)
+        )
+          acc.push(song.id);
+        return acc;
+      }, []);
+      if (songsID == null || !songsID.length) return;
+      await updateLastTimePlayedSong({
+        variables: {
+          _in: songsID,
+          last_time_played: eventObjTmp.date,
+        },
+      });
+      const allIds = songsEventArray.map((song) => song.id);
+      await incrementPlayedSong({ variables: { _in: allIds } });
+      refetchEvents();
+    } catch (error) {
+      window.console.error(error);
+    } finally {
+      handleClose();
+    }
   };
 
   const step1 = (
@@ -250,11 +357,14 @@ export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDia
     <SearchSongs
       songsEventArray={songsEventArray}
       setSongsEventArray={setSongsEventArray}
+      idEvent={eventObj.id}
     />
   );
 
-  if (loading || loadingEventSong || loadingLastTime) return "Submitting...";
+  if (loading || loadingEventSong || loadingLastTime || loadingClose)
+    return "Submitting...";
   if (error) return `Submission error! ${error.message}`;
+  if (errorClose) return `Error closing event! ${errorClose.message}`;
   if (errorEventSong) return `Submission error! ${errorEventSong.message}`;
   if (errorUpdateLastTime)
     return `Submission error! ${errorUpdateLastTime.message}`;
@@ -296,7 +406,7 @@ export default function ScrollDialog({ open, setOpen, refetchEvents }: ScrollDia
             color="inherit"
             disabled={activeStep === 0}
             onClick={handleBack}
-            sx={{ mr: 1 }}
+            sx={{ mr: 1, ...(activeStep < 1 && { display: "none" }) }}
           >
             Atras
           </Button>

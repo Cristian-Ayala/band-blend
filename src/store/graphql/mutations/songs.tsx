@@ -57,3 +57,13 @@ export const UPDATE_LAST_TIME_PLAYED_SONG = gql`
     }
   }
 `;
+
+export const INCREMENT_PLAY_COUNT = gql`
+  mutation INCREMENT_PLAY_COUNT($_in: [Int!]!) {
+    update_songs(where: { id: { _in: $_in } }, _inc: { play_count: 1 }) {
+      returning {
+        id
+      }
+    }
+  }
+`;

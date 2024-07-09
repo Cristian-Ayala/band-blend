@@ -1,7 +1,8 @@
 import { SongObj } from "@/components/songs/AddEditSong";
 import { reorder } from "@/plugins/helpers";
+import { DELETE_EVENT_SONG } from "@/store/graphql/mutations/events";
 import { GET_SONGS } from "@/store/graphql/queries/songs";
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { DropResult } from "@hello-pangea/dnd";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import ListIcon from "@mui/icons-material/List";
@@ -61,15 +62,21 @@ export const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export interface SongsCollection {
-  [key: number]: SongObj;
+  [key: number]: SongObjExtended;
+}
+
+interface SongObjExtended extends SongObj {
+  __new_song?: boolean;
 }
 
 export default function SearchSongs({
   songsEventArray,
   setSongsEventArray,
+  idEvent,
 }: {
-  songsEventArray: SongObj[];
+  songsEventArray: SongObjExtended[];
   setSongsEventArray: React.Dispatch<React.SetStateAction<SongObj[]>>;
+  idEvent: number | null;
 }) {
   const [showListSongs, setShowListSongs] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -89,7 +96,10 @@ export default function SearchSongs({
       limit: LIMIT,
     },
   });
-
+  const [
+    mutateDeleteEventSong,
+    { loading: loadingDeleteEventSong, error: errorDeleteEventSong },
+  ] = useMutation(DELETE_EVENT_SONG);
   const debouncedGetSong = useDebouncedCallback(() => {
     getSong();
   }, 1000);
@@ -104,20 +114,29 @@ export default function SearchSongs({
     event.preventDefault();
   };
 
-  const mutateSongCollection = (song: SongObj) => {
+  const mutateSongCollection = (song: SongObjExtended) => {
     if (song.id == null) return;
     const songs = {
       ...songsEvent,
     };
     if (Object.prototype.hasOwnProperty.call(songs, song.id)) {
+      if (idEvent != null && !Object.prototype.hasOwnProperty.call(songs[song.id], "__new_song")) {
+        // create query to delete song
+        mutateDeleteEventSong({
+          variables: {
+            event_id: idEvent,
+            song_id: song.id,
+          },
+        });
+      }
       delete songs[song.id];
       songsEventArray.splice(
         songsEventArray.findIndex((tmpSong) => tmpSong.id === song.id),
         1,
       );
     } else {
-      songs[song.id] = song;
-      songsEventArray.push(song);
+      songs[song.id] = { ...song, __new_song: true };
+      songsEventArray.push({ ...song, __new_song: true });
     }
     setSongsEvent(songs);
   };
@@ -146,6 +165,9 @@ export default function SearchSongs({
   }, []);
 
   if (error) return <p>Error : {error.message}</p>;
+  if (loadingDeleteEventSong) return <p>Loading...</p>;
+  if (errorDeleteEventSong)
+    return <p>Error : {errorDeleteEventSong.message}</p>;
 
   return (
     <>
