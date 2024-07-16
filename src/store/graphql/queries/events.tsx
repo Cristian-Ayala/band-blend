@@ -10,8 +10,8 @@ name
 `;
 
 export const GET_EVENTS = gql`
-  query GET_EVENTS($offset: Int = 0, $limit: Int = 10) {
-    events(offset: $offset, limit: $limit, order_by: { date: asc }) {
+  query GET_EVENTS($offset: Int = 0, $limit: Int = 10, $date: order_by = asc, $status: Boolean = true, $from: timestamp = null, $to: timestamp = null) {
+    events(offset: $offset, limit: $limit, order_by: {date: $date}, where: {active: {_eq: $status}, date: {_gte: $from, _lte: $to}}) {
       ${EVENT_FRAGMENT}
     }
     totalEvents: events_aggregate {
