@@ -6,10 +6,15 @@ import {
   StyledInputBase,
 } from "@/components/songs/SearchSongs";
 import SongListItemMainStyle from "@/components/songs/SongListItemMainStyle";
+import SortSongs, { SongsSortProps } from "@/components/songs/SortSongs";
+import FilterSongs, { SongsFilterProps } from "@/components/songs/FilterSongs";
 import { GET_SONGS } from "@/store/graphql/queries/songs";
 import { useQuery } from "@apollo/client";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
+import SortIcon from "@mui/icons-material/Sort";
+import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
 import React, { useCallback, useState } from "react";
 import { useDebounce } from "use-debounce";
@@ -30,6 +35,20 @@ export default function SongsIndex() {
     },
     [],
   );
+  const [songSortProps, setSongSortProps] = useState<SongsSortProps>({
+    timesPlayed: null,
+    date: null,
+    status: null,
+    title: "asc",
+  });
+
+  const [filters, setfilters] = useState<SongsFilterProps>({
+    genre: null,
+    artist: "",
+  });
+  filters;
+  const [openSortEventDrawer, setSortEventDrawer] = useState(false);
+  const [openFilterEventDrawer, setFilterEventDrawer] = useState(false);
 
   const [page, setPage] = useState(1);
   const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
@@ -48,6 +67,11 @@ export default function SongsIndex() {
       searchKeyword: `%${debouncedText}%`,
       offset: (page - 1) * LIMIT,
       limit: LIMIT,
+      last_time_played: songSortProps.date,
+      play_count: songSortProps.timesPlayed,
+      title: songSortProps.title,
+      artistFilter: filters.artist.trim() === "" ? null : filters.artist,
+      genreFilter: filters.genre,
     },
   });
 
@@ -58,6 +82,26 @@ export default function SongsIndex() {
     },
     [],
   );
+
+  const toggleSortSongDrawer = (open: boolean) => () => {
+    setSortEventDrawer(open);
+  };
+
+  const setSortSongs = (filters: SongsSortProps) => {
+    setSongSortProps(filters);
+    setPage(1);
+    toggleSortSongDrawer(false)();
+  };
+
+  const setFilterSongs = (filters: SongsFilterProps) => {
+    setfilters(filters);
+    setPage(1);
+    toggleFilterSongDrawer(false)();
+  };
+
+  const toggleFilterSongDrawer = (open: boolean) => () => {
+    setFilterEventDrawer(open);
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error : {error.message}</p>;
@@ -95,6 +139,24 @@ export default function SongsIndex() {
                   onChange={onChangeSearchInput}
                 />
               </Search>
+            </div>
+            <div className="flex w-full justify-between">
+              <Button
+                variant="outlined"
+                sx={{ width: "48%", borderColor: "white", color: "white" }}
+                startIcon={<SortIcon />}
+                onClick={() => toggleSortSongDrawer(true)()}
+              >
+                Ordenar
+              </Button>
+              <Button
+                variant="outlined"
+                sx={{ width: "48%", borderColor: "white", color: "white" }}
+                startIcon={<FilterAltIcon />}
+                onClick={() => toggleFilterSongDrawer(true)()}
+              >
+                Filtrar
+              </Button>
             </div>
             <div className="grid gap-4">
               {data.songs.map((song: SongObj) => (
@@ -139,6 +201,18 @@ export default function SongsIndex() {
           selectedSong={selectedSong}
         />
       )}
+      <SortSongs
+        open={openSortEventDrawer}
+        songSortProps={songSortProps}
+        toggleSortSongDrawer={toggleSortSongDrawer}
+        applySortSong={setSortSongs}
+      />
+      <FilterSongs
+        open={openFilterEventDrawer}
+        toggleFilterSongDrawer={toggleFilterSongDrawer}
+        filters={filters}
+        applyFilterBy={setFilterSongs}
+      />
     </>
   );
 }

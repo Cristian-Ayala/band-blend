@@ -17,7 +17,7 @@ export default function SortEvents({
   ) => (event: React.KeyboardEvent | React.MouseEvent) => void;
   applySortBy: (sortByDate: string) => void;
 }) {
-  const [sortByDate, setSortByDate] = useState<string>("asc");
+  const [sortByDate, setSortByDate] = useState<string>("desc");
 
   const handleAlignment = (
     _: React.MouseEvent<HTMLElement>,

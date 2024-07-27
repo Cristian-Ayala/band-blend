@@ -51,7 +51,7 @@ export default function FilterEvents({
         onClose={toggleFilterEventDrawer(false)}
       >
         <div className="self-center mt-4 mb-4" style={{ width: "95%" }}>
-          <h2 className="font-black uppercase mb-4">Ordenar por:</h2>
+          <h2 className="font-black uppercase mb-4">Filtrar por:</h2>
           <h6>Estado del evento:</h6>
           <ToggleButtonGroup
             value={filterBy.status}
@@ -132,7 +132,7 @@ export default function FilterEvents({
           }}
           onClick={() => applyFilterBy(filterBy)}
         >
-          Aplicar Orden
+          Aplicar Filtro
         </Button>
       </Drawer>
     </>

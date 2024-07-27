@@ -274,7 +274,6 @@ export default function ScrollDialog({
           acc.push(song.id);
         return acc;
       }, []);
-      if (songsID == null || !songsID.length) return;
       await updateLastTimePlayedSong({
         variables: {
           _in: songsID,
@@ -283,11 +282,11 @@ export default function ScrollDialog({
       });
       const allIds = songsEventArray.map((song) => song.id);
       await incrementPlayedSong({ variables: { _in: allIds } });
-      refetchEvents();
     } catch (error) {
       window.console.error(error);
     } finally {
       handleClose();
+      refetchEvents();
     }
   };
 

@@ -22,7 +22,7 @@ export default function Events() {
   >([]);
   const [openSortEventDrawer, setSortEventDrawer] = useState(false);
   const [openFilterEventDrawer, setFilterEventDrawer] = useState(false);
-  const [sortDate, setSortDate] = useState<string>("asc");
+  const [sortDate, setSortDate] = useState<string>("desc");
   const [filters, setFilters] = useState<FilterEventsProps>({
     from: null,
     to: null,
@@ -41,11 +41,13 @@ export default function Events() {
 
   const setSortByDate = (sortByDate: string) => {
     setSortDate(sortByDate);
+    setPage(1);
     toggleSortEventDrawer(false)();
   };
 
   const setFilterBy = (filters: FilterEventsProps) => {
     setFilters(filters);
+    setPage(1);
     toggleFilterEventDrawer(false)();
   };
 

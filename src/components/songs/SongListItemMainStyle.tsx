@@ -2,6 +2,13 @@ import { SongObj } from "@/components/songs/AddEditSong";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import DriveFileRenameOutlineRoundedIcon from "@mui/icons-material/DriveFileRenameOutlineRounded";
 
+// Opciones para el formateo
+const options: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+
 export default function songListItemMainStyle({
   song,
   handleSongSelection,
@@ -23,6 +30,18 @@ export default function songListItemMainStyle({
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {song.artist}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Última vez tocada:{" "}
+              {song.last_time_played
+                ? new Date(song.last_time_played).toLocaleDateString(
+                    "es-ES",
+                    options,
+                  )
+                : "Nunca tocada"}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Veces que se ha tocado: {song.play_count}
             </p>
           </div>
           <div className="flex items-center gap-2">
