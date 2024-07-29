@@ -33,6 +33,8 @@ import "dayjs/locale/es";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { localEventObj } from "./EventListItem.tsx";
 
+dayjs.locale("es");
+
 interface EventSong {
   event_id: number | null;
   song_id: number | null;
@@ -139,13 +141,42 @@ export default function ScrollDialog({
   }, [eventObj]);
 
   useEffect(() => {
-    if (open) {
-      const { current: descriptionElement } = descriptionElementRef;
-      if (descriptionElement !== null) {
-        descriptionElement.focus();
-      }
+    if (open == null) return;
+    const { current: descriptionElement } = descriptionElementRef;
+    if (descriptionElement !== null) {
+      descriptionElement.focus();
     }
   }, [open]);
+
+  useEffect(() => {
+    if (eventObj.date == null || !dayjs(eventObj.date).isValid()) return;
+    const day = eventObj.date.format("dddd").toUpperCase();
+    setEventObj((prevEventObj) => ({ ...prevEventObj, name: day }));
+
+    if (day === "MIÉRCOLES") {
+      setEventObj((prevEventObj) => {
+        const hourDay =
+          prevEventObj.hour != null && dayjs(prevEventObj.hour).isValid()
+            ? prevEventObj.hour
+            : dayjs();
+        return {
+          ...prevEventObj,
+          hour: hourDay.hour(18).minute(30).second(0).millisecond(0),
+        };
+      });
+    } else if (day === "DOMINGO") {
+      setEventObj((prevEventObj) => {
+        const hourDay =
+          prevEventObj.hour != null && dayjs(prevEventObj.hour).isValid()
+            ? prevEventObj.hour
+            : dayjs();
+        return {
+          ...prevEventObj,
+          hour: hourDay.hour(10).minute(0).second(0).millisecond(0),
+        };
+      });
+    }
+  }, [eventObj.date]);
 
   const showCloseEventBtn = useMemo(() => {
     if (
@@ -193,12 +224,29 @@ export default function ScrollDialog({
     { loading: loadingLastTime, error: errorUpdateLastTime },
   ] = useMutation(UPDATE_LAST_TIME_PLAYED_SONG);
 
+  const mergeDateAndHour = () => {
+    try {
+      if (eventObj.date == null || eventObj.hour == null) throw new Error();
+      const eventDate = eventObj.date.clone();
+      return eventDate
+        .hour(eventObj.hour.get("hour"))
+        .minute(eventObj.hour.get("minute"))
+        .second(eventObj.hour.get("second"))
+        .millisecond(0)
+        .toISOString();
+    } catch (error) {
+      window.console.error(error);
+      return eventObj.date?.toISOString() || dayjs(new Date()).toISOString();
+    }
+  };
+
   const handleMutateEvent = async () => {
     try {
       const eventObjTmp = JSON.parse(JSON.stringify(eventObj));
       delete eventObjTmp.__typename;
       if (eventObj.id == null) delete eventObjTmp.id;
       eventObjTmp.hour = getTimeFromDate(eventObjTmp.hour);
+      eventObjTmp.date = mergeDateAndHour();
       const resEvent = await mutateEvent({
         variables: {
           object: eventObjTmp,
@@ -376,6 +424,7 @@ export default function ScrollDialog({
         scroll="paper"
         aria-labelledby="scroll-dialog-title"
         aria-describedby="scroll-dialog-description"
+        aria-modal="true"
       >
         <DialogTitle id="scroll-dialog-title">
           {eventObj.id ? "Editar" : "Agregar"} evento

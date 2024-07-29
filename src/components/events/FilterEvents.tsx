@@ -7,7 +7,6 @@ import { esES } from "@mui/x-date-pickers/locales";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { Dayjs } from "dayjs";
-import "dayjs/locale/es";
 import React, { useEffect, useState } from "react";
 
 export interface FilterEventsProps {

@@ -20,6 +20,8 @@ import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/es";
 import { useEffect, useRef, useState } from "react";
 
+dayjs.locale("es");
+
 interface ScrollDialogProps {
   open: boolean;
   setOpen: (stateProp: boolean) => void;
@@ -35,7 +37,7 @@ export interface SongObj {
   album: number;
   release_date: Dayjs | null;
   genre: number;
-  duration: string | null;
+  duration: string;
   desc: string;
   lyrics: string;
   play_count: number;
@@ -153,7 +155,7 @@ export default function AddEditSong({
           fullWidth
           id="song_name"
           label="Nombre de la canción"
-          value={songObj.title}
+          value={songObj.title ?? ""}
           onChange={(e) =>
             setSongObj({
               ...songObj,
@@ -168,7 +170,7 @@ export default function AddEditSong({
           fullWidth
           id="song_name"
           label="Nombre del artista"
-          value={songObj.artist}
+          value={songObj.artist ?? ""}
           onChange={(e) =>
             setSongObj({
               ...songObj,
@@ -210,7 +212,7 @@ export default function AddEditSong({
           fullWidth
           id="song_duration"
           label="Duración"
-          value={songObj.duration}
+          value={songObj.duration ?? ""}
           onChange={(e) => setSongObj({ ...songObj, duration: e.target.value })}
         />
       </Grid>
@@ -239,7 +241,7 @@ export default function AddEditSong({
           fullWidth
           id="description_song"
           label="Descripción"
-          value={songObj.desc}
+          value={songObj.desc ?? ""}
           onChange={(e) => setSongObj({ ...songObj, desc: e.target.value })}
         />
       </Grid>
