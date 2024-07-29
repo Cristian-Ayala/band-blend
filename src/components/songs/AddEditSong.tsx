@@ -258,6 +258,7 @@ export default function AddEditSong({
         scroll="paper"
         aria-labelledby="scroll-dialog-title"
         aria-describedby="scroll-dialog-description"
+        aria-modal="true"
       >
         <DialogTitle id="scroll-dialog-title">
           {songObj.id ? "Editar" : "Agregar"} canción
