@@ -68,3 +68,9 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.activeLink {
+  background: gray;
+  margin: 0 1rem;
+  border-radius: .5rem;
+}

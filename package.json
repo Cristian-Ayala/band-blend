@@ -10,25 +10,35 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^3.10.4",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@fontsource/roboto": "^5.0.13",
+    "@hello-pangea/dnd": "^16.6.0",
     "@mui/icons-material": "^5.15.16",
     "@mui/material": "^5.15.16",
+    "@mui/x-date-pickers": "^7.4.0",
+    "dayjs": "^1.11.11",
+    "graphql": "^16.8.1",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.23.0"
+    "react-router-dom": "^6.23.0",
+    "use-debounce": "^10.0.1",
+    "vite-plugin-pwa": "^0.20.1"
   },
   "devDependencies": {
-    "@types/node": "^20.12.8",
+    "@types/lodash": "^4.17.4",
+    "@types/node": "^20.14.6",
     "@types/react": "^18.2.66",
+    "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.38",
     "standard": "^17.1.0",
@@ -37,6 +47,9 @@
     "vite": "^5.2.0"
   },
   "eslintConfig": {
-    "extends": "standard"
+    "extends": [
+      "standard",
+      "plugin:react-hooks/recommended"
+    ]
   }
 }
