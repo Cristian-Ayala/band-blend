@@ -7,12 +7,14 @@ import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
 import { useCallback, useMemo, useState } from "react";
 import AddEditEvents, { EventSongColection } from "./AddEditEvents.tsx";
+import ListSongsInEvent from "./ListSongsInEvent.tsx";
 import EventListItem, { localEventObj } from "./EventListItem.tsx";
 import SortEvent from "./SortEvents.tsx";
 import FilterEvent, { FilterEventsProps } from "./FilterEvents.tsx";
 
 export default function Events() {
   const [open, setOpen] = useState(false);
+  const [openListSongInEvent, setOpenListSongInEvent] = useState(false);
   const [page, setPage] = useState(1);
   const [selectedEvent, setSelectedEvent] = useState<localEventObj | null>(
     null,
@@ -79,19 +81,17 @@ export default function Events() {
     async (event: localEventObj, openEditDialog: boolean) => {
       let eventSongRes = null;
       setSelectedEvent(event);
-      if (openEditDialog) {
-        if (event && event.id != null) {
-          eventSongRes = await getEventSongs({
-            fetchPolicy: "network-only",
-            variables: {
-              event_id: event?.id || 0,
-            },
-          });
-          setEventSongsSelected(eventSongRes?.data?.event_songs || []);
-        }
-        setOpen(true);
+      if (event && event.id != null) {
+        eventSongRes = await getEventSongs({
+          fetchPolicy: "network-only",
+          variables: {
+            event_id: event?.id || 0,
+          },
+        });
+        setEventSongsSelected(eventSongRes?.data?.event_songs || []);
       }
-      // else setOpenDeleteSongDialog(true);
+      if (openEditDialog) setOpen(true);
+      else setOpenListSongInEvent(true);
     },
     [getEventSongs],
   );
@@ -167,6 +167,14 @@ export default function Events() {
           eventSongsSelected={eventSongsSelected}
           setEventSongsSelected={setEventSongsSelected}
         />
+        {eventSongsSelected && selectedEvent && (
+          <ListSongsInEvent
+            open={openListSongInEvent}
+            setOpen={setOpenListSongInEvent}
+            selectedEvent={selectedEvent}
+            eventSongsSelected={eventSongsSelected}
+          />
+        )}
       </div>
       <SortEvent
         open={openSortEventDrawer}
