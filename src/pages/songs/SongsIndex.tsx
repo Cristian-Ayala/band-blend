@@ -112,7 +112,7 @@ export default function SongsIndex() {
         <div className="grid gap-6">
           <div className="grid gap-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+              <h2 className="text-2xl font-bold text-gray-50">
                 Canciones
               </h2>
 
@@ -176,7 +176,7 @@ export default function SongsIndex() {
                 className="w-full flex items-center justify-center"
                 onChange={handleChange}
               />
-              <h6 className="text-sm text-gray-500 dark:text-gray-400 text-center">
+              <h6 className="text-sm text-gray-400 text-center">
                 {data.totalSongs?.aggregate?.count}{" "}
                 {data.totalSongs?.aggregate?.count === 1
                   ? "Cancion"

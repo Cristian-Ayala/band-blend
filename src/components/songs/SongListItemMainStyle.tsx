@@ -27,14 +27,14 @@ export default function songListItemMainStyle({
       <div className="p-3 grid gap-4">
         <div className="flex items-center justify-between">
           <div className="grid gap-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
+            <h3 className="text-lg font-semibold text-gray-50">
               {song.title}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-400">
               {song.artist}
             </p>
             {!hideOptions && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-400">
                 Última vez tocada:{" "}
                 {song.last_time_played
                   ? new Date(song.last_time_played).toLocaleDateString(
@@ -46,7 +46,7 @@ export default function songListItemMainStyle({
             )}
 
             {hideOptions ? null : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-400">
                 Veces que se ha tocado: {song.play_count}
               </p>
             )}

@@ -30,16 +30,16 @@ export default function EventListItem({
       <div className="p-3 grid">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
+            <h3 className="text-lg font-semibold text-gray-900 text-gray-50">
               {event.name}
             </h3>
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-400">
                 {getLongDateFromStringDate(event.date)}
               </p>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-400">
                 {getHourFromStringTime(event.hour)}
               </p>
             </div>
@@ -47,7 +47,7 @@ export default function EventListItem({
               className="flex items-center justify-between"
               style={showDesc ? {} : { display: "none" }}
             >
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-400">
                 {event.desc}
               </p>
             </div>

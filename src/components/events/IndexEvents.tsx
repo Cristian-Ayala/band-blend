@@ -107,7 +107,7 @@ export default function Events() {
     <>
       <div className="grid gap-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+          <h1 className="text-2xl font-bold text-gray-50">
             Próximos Eventos
           </h1>
           <button

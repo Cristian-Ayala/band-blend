@@ -50,7 +50,7 @@ export default function SideBar({ open, handleDrawerClose }: SideBarProps) {
         <NavLink
           to="/"
           className={({ isActive }) =>
-            `flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-50 hover:text-white transition-all duration-500 ease-in-out ${
+            `flex items-center gap-2 font-semibold text-gray-900 text-gray-50 hover:text-white transition-all duration-500 ease-in-out ${
               isActive ? "activeLink" : ""
             }`
           }
@@ -67,7 +67,7 @@ export default function SideBar({ open, handleDrawerClose }: SideBarProps) {
         <NavLink
           to="/songs"
           className={({ isActive }) =>
-            `flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-50 hover:text-white transition-all duration-500 ease-in-out ${
+            `flex items-center gap-2 font-semibold text-gray-50 hover:text-white transition-all duration-500 ease-in-out ${
               isActive ? "activeLink" : ""
             }`
           }

@@ -22,7 +22,7 @@ export default function App() {
     <>
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
-        <div className="flex min-h-screen flex-col bg-gray-100 dark:bg-gray-950">
+        <div className="flex min-h-screen flex-col bg-gray-950">
           <Header />
           <RoutesReact />
           <Footer />
