@@ -42,6 +42,7 @@ export interface SongObj {
   lyrics: string;
   play_count: number;
   last_time_played: string | null;
+  member_id?: number | null;
 }
 
 export default function AddEditSong({

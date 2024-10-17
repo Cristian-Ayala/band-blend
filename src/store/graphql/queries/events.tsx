@@ -24,12 +24,24 @@ export const GET_EVENTS = gql`
 
 export const GET_EVENT_SONGS = gql`
   query GET_EVENT_SONGS($event_id: Int!) {
-    event_songs(where: { event_id: { _eq: $event_id } }) {
+    event_songs(
+      where: { event_id: { _eq: $event_id } }
+      order_by: { order: asc }
+    ) {
       order
       event_id
       song_id
       song {
         ${SONG_FRAGMENT}
+      }
+      member {
+        id
+        last_name
+        first_name
+        role {
+          id
+          role_name
+        }
       }
     }
   }

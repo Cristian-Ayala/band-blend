@@ -57,7 +57,14 @@ export default function FilterEvents({
   useEffect(() => {
     if (data == null || data.songs == null || !Array.isArray(data.songs))
       return;
-    setSongArtist(data.songs.map((artist: ArtistInterface) => artist.artist));
+    const filteredArtists = data.songs.reduce(
+      (acc: string[], song: ArtistInterface) => {
+        if (song.artist) acc.push(song.artist);
+        return acc;
+      },
+      [],
+    );
+    setSongArtist(filteredArtists);
   }, [data]);
 
   return (
@@ -66,6 +73,7 @@ export default function FilterEvents({
         anchor={"bottom"}
         open={open}
         onClose={toggleFilterSongDrawer(false)}
+        PaperProps={{ style: { height: "calc(100% - 170px)", top: 170 } }}
       >
         <div className="self-center mt-4 mb-4" style={{ width: "95%" }}>
           <h2 className="font-black uppercase mb-4">Filtrar por:</h2>
@@ -88,7 +96,7 @@ export default function FilterEvents({
             <Autocomplete
               value={filterBy.artist}
               disablePortal
-              isOptionEqualToValue={(option, value) => option?.valueOf === value?.valueOf}
+              isOptionEqualToValue={(option, value) => option === value}
               id="filterBy.artist"
               autoHighlight
               getOptionLabel={(option: string) => option || ""}

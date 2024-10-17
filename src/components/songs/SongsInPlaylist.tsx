@@ -1,5 +1,7 @@
 import { SongObj } from "@/components/songs/AddEditSong";
 import { SongsCollection } from "@/components/songs/SearchSongs";
+import { GET_MEMBERS } from "@/store/graphql/queries/members";
+import { useQuery } from "@apollo/client";
 import {
   DragDropContext,
   Droppable,
@@ -32,6 +34,7 @@ interface SongsInPlaylistProps {
   mutateSongCollection: (song: SongObj) => void;
   onDragEnd: OnDragEndResponder;
   songsEventArray: SongObj[];
+  setMemberInSong: (song: SongObj, member_id: number) => void;
 }
 
 const SongsInPlaylist = ({
@@ -40,7 +43,14 @@ const SongsInPlaylist = ({
   mutateSongCollection,
   onDragEnd,
   songsEventArray,
+  setMemberInSong,
 }: SongsInPlaylistProps) => {
+  const { loading, error, data } = useQuery(GET_MEMBERS, {
+    fetchPolicy: "network-only",
+  });
+
+  if (loading) return "Loading...";
+  if (error) return `Error! ${error.message}`;
   return (
     <Dialog
       open={open}
@@ -61,13 +71,15 @@ const SongsInPlaylist = ({
           <Droppable droppableId="droppable-list">
             {(provided) => (
               <List ref={provided.innerRef} {...provided.droppableProps}>
-                {songsEventArray && songsEventArray.length > 0
+                {songsEventArray && songsEventArray.length > 0 && data != null
                   ? songsEventArray.map((song, index) => (
                       <DraggableListItem
                         key={song.id}
                         song={song}
                         mutateSongCollection={mutateSongCollection}
                         index={index}
+                        setMemberInSong={setMemberInSong}
+                        membersObj={data}
                       />
                     ))
                   : ""}

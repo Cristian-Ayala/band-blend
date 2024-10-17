@@ -1,5 +1,6 @@
 import { SongObj } from "@/components/songs/AddEditSong";
 import SearchSongs from "@/components/songs/SearchSongs.tsx";
+import { MemberObj } from "@/pages/members/MembersIndex";
 import { getTimeFromDate } from "@/plugins/helpers";
 import {
   ADD_EVENT_SONG,
@@ -42,6 +43,7 @@ interface EventSong {
 }
 export interface EventSongColection extends EventSong {
   song: SongObj;
+  member: MemberObj;
 }
 
 interface ScrollDialogProps {
@@ -115,8 +117,9 @@ export default function ScrollDialog({
         eventSongsSelected.length === 0
       )
         return;
-      const mappedSongs = eventSongsSelected.map(({ song }) => ({
+      const mappedSongs = eventSongsSelected.map(({ song, member }) => ({
         ...song,
+        member_id: member?.id,
       }));
       setSongsEventArray(mappedSongs);
     } else {
@@ -268,6 +271,7 @@ export default function ScrollDialog({
               event_id: eventId,
               song_id: song.id,
               order: index + 1,
+              member_id: song.member_id,
             };
             if (Object.prototype.hasOwnProperty.call(song, "__new_song")) {
               // New song
@@ -287,6 +291,7 @@ export default function ScrollDialog({
           },
         });
       }
+      // TODO: convert to one mutation receiving objects and updating order
       const promiseEventSongOrderUpdate = existingSongs.map((eventSong) =>
         editOrderEventSong({
           variables: {

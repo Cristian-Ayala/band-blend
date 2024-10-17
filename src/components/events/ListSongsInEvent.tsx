@@ -31,7 +31,6 @@ export default function ListSongsInEvent({
   const handleClose = () => {
     setOpen(false);
   };
-
   const formattedDate = new Date(selectedEvent.date).toLocaleDateString(
     "es-ES",
     options,
@@ -59,6 +58,7 @@ export default function ListSongsInEvent({
                   song={eventSong.song}
                   hideOptions={true}
                   handleSongSelection={() => {}}
+                  memberSel={eventSong.member}
                 />
               ))}
             </div>

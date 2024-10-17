@@ -120,7 +120,10 @@ export default function SearchSongs({
       ...songsEvent,
     };
     if (Object.prototype.hasOwnProperty.call(songs, song.id)) {
-      if (idEvent != null && !Object.prototype.hasOwnProperty.call(songs[song.id], "__new_song")) {
+      if (
+        idEvent != null &&
+        !Object.prototype.hasOwnProperty.call(songs[song.id], "__new_song")
+      ) {
         // create query to delete song
         mutateDeleteEventSong({
           variables: {
@@ -139,6 +142,19 @@ export default function SearchSongs({
       songsEventArray.push({ ...song, __new_song: true });
     }
     setSongsEvent(songs);
+  };
+
+  const setMemberInSong = (song: SongObjExtended, member_id: number) => {
+    if (song.id == null || member_id == null) return;
+    const songsEventTmp: SongObjExtended[] = JSON.parse(
+      JSON.stringify(songsEventArray),
+    );
+    const getIdx = songsEventTmp.findIndex(
+      (tmpSong: SongObjExtended) => tmpSong.id === song.id,
+    );
+    if (getIdx != null) songsEventTmp[getIdx].member_id = member_id;
+    setSongsEvent(songsEventTmp.map((song) => song));
+    setSongsEventArray(songsEventTmp);
   };
 
   const onDragEnd = ({ destination, source }: DropResult) => {
@@ -241,6 +257,7 @@ export default function SearchSongs({
         songsEvent={songsEvent}
         songsEventArray={songsEventArray}
         onDragEnd={onDragEnd}
+        setMemberInSong={setMemberInSong}
       />
     </>
   );

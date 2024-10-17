@@ -18,7 +18,7 @@ export default function Header() {
       <header className="flex h-14 items-center justify-between px-4 border-gray-800 bg-gray-900">
         <Link
           to="/"
-          className="flex items-center gap-2 font-semibold text-gray-900 text-gray-50"
+          className="flex items-center gap-2 font-semibold text-gray-50"
         >
           <img src="/band-blend.svg" width="32" height="32" alt="Band Blend" />
           <span>Band Blend</span>
