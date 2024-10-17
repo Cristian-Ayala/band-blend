@@ -38,14 +38,16 @@ export const UPDATE_ORDER_EVENT_SONG = gql`
     $event_id: Int!
     $song_id: Int!
     $order: Int!
+    $member_id: Int
   ) {
     update_event_songs_by_pk(
       pk_columns: { event_id: $event_id, song_id: $song_id }
-      _set: { order: $order }
+      _set: { order: $order, member_id: $member_id }
     ) {
       event_id
       song_id
       order
+      member_id
     }
   }
 `;

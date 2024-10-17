@@ -30,7 +30,7 @@ export default function EventListItem({
       <div className="p-3 grid">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 text-gray-50">
+            <h3 className="text-lg font-semibold text-gray-50">
               {event.name}
             </h3>
             <div className="flex items-center justify-between">

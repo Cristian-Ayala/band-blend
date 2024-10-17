@@ -1,6 +1,8 @@
 import { SongObj } from "@/components/songs/AddEditSong";
+import { MemberObj } from "@/pages/members/MembersIndex";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import DriveFileRenameOutlineRoundedIcon from "@mui/icons-material/DriveFileRenameOutlineRounded";
+import SpatialAudioOffRoundedIcon from "@mui/icons-material/SpatialAudioOffRounded";
 
 // Opciones para el formateo
 const options: Intl.DateTimeFormatOptions = {
@@ -13,10 +15,12 @@ export default function songListItemMainStyle({
   song,
   hideOptions,
   handleSongSelection,
+  memberSel,
 }: {
   song: SongObj;
   hideOptions?: boolean;
   handleSongSelection: (song: SongObj, openEditDialog: boolean) => void;
+  memberSel?: MemberObj;
 }) {
   return (
     <div
@@ -27,12 +31,14 @@ export default function songListItemMainStyle({
       <div className="p-3 grid gap-4">
         <div className="flex items-center justify-between">
           <div className="grid gap-1">
-            <h3 className="text-lg font-semibold text-gray-50">
-              {song.title}
-            </h3>
-            <p className="text-sm text-gray-400">
-              {song.artist}
-            </p>
+            <h3 className="text-lg font-semibold text-gray-50">{song.title}</h3>
+            {memberSel != null && memberSel?.id && (
+              <p className="text-sm text-gray-400 flex items-center gap-2">
+                <SpatialAudioOffRoundedIcon></SpatialAudioOffRoundedIcon>{" "}
+                {memberSel.first_name} {memberSel.last_name}
+              </p>
+            )}
+            <p className="text-sm text-gray-400">{song.artist}</p>
             {!hideOptions && (
               <p className="text-sm text-gray-400">
                 Última vez tocada:{" "}

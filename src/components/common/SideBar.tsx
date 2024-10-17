@@ -1,15 +1,13 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import ListIcon from "@mui/icons-material/List";
+import QueueMusicRoundedIcon from "@mui/icons-material/QueueMusicRounded";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import { styled } from "@mui/material/styles";
-import { NavLink } from "react-router-dom";
+import NavLinkSideBar from "./NavLinkSideBar";
 
 const drawerWidth = 240;
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -27,6 +25,29 @@ interface SideBarProps {
 }
 
 export default function SideBar({ open, handleDrawerClose }: SideBarProps) {
+  const arrayOfPath = [
+    {
+      routeTo: "/",
+      routeName: "Eventos",
+      icon: ListIcon,
+    },
+    {
+      routeTo: "/songs",
+      routeName: "Canciones",
+      icon: LibraryMusicIcon,
+    },
+    {
+      routeTo: "/members",
+      routeName: "Miembros",
+      icon: GroupsRoundedIcon,
+    },
+    {
+      routeTo: "/roles",
+      routeName: "Roles",
+      icon: QueueMusicRoundedIcon,
+    },
+  ];
+
   return (
     <Drawer
       sx={{
@@ -47,40 +68,9 @@ export default function SideBar({ open, handleDrawerClose }: SideBarProps) {
         </IconButton>
       </DrawerHeader>
       <List>
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            `flex items-center gap-2 font-semibold text-gray-900 text-gray-50 hover:text-white transition-all duration-500 ease-in-out ${
-              isActive ? "activeLink" : ""
-            }`
-          }
-        >
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                <ListIcon />
-              </ListItemIcon>
-              <ListItemText primary="Eventos" />
-            </ListItemButton>
-          </ListItem>
-        </NavLink>
-        <NavLink
-          to="/songs"
-          className={({ isActive }) =>
-            `flex items-center gap-2 font-semibold text-gray-50 hover:text-white transition-all duration-500 ease-in-out ${
-              isActive ? "activeLink" : ""
-            }`
-          }
-        >
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                <LibraryMusicIcon />
-              </ListItemIcon>
-              <ListItemText primary="Canciones" />
-            </ListItemButton>
-          </ListItem>
-        </NavLink>
+        {arrayOfPath.map((path) => (
+          <NavLinkSideBar key={path.routeTo} {...path} />
+        ))}
       </List>
     </Drawer>
   );
