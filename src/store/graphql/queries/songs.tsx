@@ -20,7 +20,7 @@ export const GET_SONGS = gql`
     $limit: Int = 5
     $last_time_played: order_by = null
     $play_count: order_by = null
-    $title: order_by = null
+    $title: order_by = asc_nulls_first
     $artistFilter: String = null
     $genreFilter: Int = null
   ) {
