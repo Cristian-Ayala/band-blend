@@ -116,8 +116,18 @@ export default function SearchSongs({
 
   const mutateSongCollection = (song: SongObjExtended) => {
     if (song.id == null) return;
+    let tmpSongsEvent = { ...songsEvent };
+    if (Array.isArray(songsEvent)) {
+      tmpSongsEvent = songsEvent.reduce<Record<number, SongObjExtended>>(
+        (acc, song: SongObjExtended) => {
+          if (song != null && song.id != null) acc[song.id] = song;
+          return acc;
+        },
+        {},
+      );
+    }
     const songs = {
-      ...songsEvent,
+      ...tmpSongsEvent,
     };
     if (Object.prototype.hasOwnProperty.call(songs, song.id)) {
       if (
