@@ -3,7 +3,7 @@ import { VitePWAOptions } from "vite-plugin-pwa";
 const pwaManifest: Partial<VitePWAOptions> = {
   registerType: "autoUpdate",
   manifest: {
-    id: "2.0.0",
+    id: "3.0.0",
     name: "Band Blend",
     short_name: "Band Blend",
     description:

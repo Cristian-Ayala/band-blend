@@ -1,5 +1,5 @@
-import { gql } from "@apollo/client";
 import { SONG_FRAGMENT } from "@/store/graphql/queries/songs";
+import { gql } from "@apollo/client";
 
 export const EVENT_FRAGMENT = `
 id
@@ -31,6 +31,7 @@ export const GET_EVENT_SONGS = gql`
       order
       event_id
       song_id
+      song_version_id
       song {
         ${SONG_FRAGMENT}
       }
@@ -42,6 +43,14 @@ export const GET_EVENT_SONGS = gql`
           id
           role_name
         }
+      }
+      song_version {
+        id
+        version_name
+        lyrics
+        key_note
+        bpm
+        url
       }
     }
   }

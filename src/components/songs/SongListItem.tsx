@@ -8,6 +8,8 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { styled } from "@mui/material/styles";
 import dayjs from "dayjs";
+import { useState } from "react";
+import SongVersions from "./SongVersions";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -20,13 +22,21 @@ const Item = styled(Paper)(({ theme }) => ({
 interface songListItemProps {
   songsEvent: SongsCollection;
   song: SongObj;
-  mutateSongCollection: (song: SongObj) => void;
+  mutateSongCollection: (
+    song: SongObj,
+    songVerID?: number | string | null,
+    modifyVer?: boolean,
+    songVerName?: string | null,
+  ) => void;
 }
+
 export default function SongListItem({
   song,
   songsEvent = {},
   mutateSongCollection,
 }: songListItemProps) {
+  const [open, setOpen] = useState(false);
+
   return (
     <Stack spacing={2} className="w-full mt-2 mb-2">
       <Item>
@@ -66,7 +76,7 @@ export default function SongListItem({
                 aria-label="add"
                 size="small"
                 sx={{ marginRight: "1rem" }}
-                onClick={() => mutateSongCollection(song)}
+                onClick={() => setOpen(true)}
                 className="focus:outline-none"
               >
                 <Add />
@@ -75,6 +85,12 @@ export default function SongListItem({
           </Grid>
         </Grid>
       </Item>
+      <SongVersions
+        open={open}
+        setOpen={setOpen}
+        mutateSongCollection={mutateSongCollection}
+        song={song}
+      />
     </Stack>
   );
 }
