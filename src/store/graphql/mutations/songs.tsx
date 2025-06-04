@@ -67,3 +67,36 @@ export const INCREMENT_PLAY_COUNT = gql`
     }
   }
 `;
+
+export const ADD_SONG_VERSION = gql`
+  mutation ADD_SONG_VERSION(
+    $object: song_versions_insert_input!
+    $update_columns: [song_versions_update_column!] = [
+      song_id
+      version_name
+      bpm
+      key_note
+      url
+      lyrics
+    ]
+  ) {
+    insert_song_versions_one(
+      object: $object
+      on_conflict: {
+        constraint: song_versions_pkey
+        update_columns: $update_columns
+      }
+    ) {
+      id
+      version_name
+    }
+  }
+`;
+
+export const DELETE_SONG_VERSION = gql`
+  mutation DELETE_SONG_VERSION($id: Int!) {
+    delete_song_versions_by_pk(id: $id) {
+      id
+    }
+  }
+`;

@@ -64,3 +64,19 @@ export const GET_ARTISTS = gql`
     }
   }
 `;
+
+export const GET_SONG_VERSIONS = gql`
+  query GET_SONG_VERSIONS($song_id: Int!, $version_id: Int) {
+    song_versions(
+      where: { song_id: { _eq: $song_id }, id: { _eq: $version_id } }
+      order_by: { order: asc }
+    ) {
+      id
+      version_name
+      lyrics
+      key_note
+      url
+      bpm
+    }
+  }
+`;

@@ -1,5 +1,7 @@
 import { SongObj } from "@/components/songs/AddEditSong";
-import SearchSongs from "@/components/songs/SearchSongs.tsx";
+import SearchSongs, {
+  SongObjExtended,
+} from "@/components/songs/SearchSongs.tsx";
 import { MemberObj } from "@/pages/members/MembersIndex";
 import { getTimeFromDate } from "@/plugins/helpers";
 import {
@@ -40,10 +42,22 @@ interface EventSong {
   event_id: number | null;
   song_id: number | null;
   order: number;
+  song_version_id?: number | string;
+  member_id?: number | null;
+}
+
+export interface SongVersionObj {
+  id: number | null;
+  version_name: string;
+  lyrics: string;
+  key_note?: string;
+  url?: string;
+  bpm?: number;
 }
 export interface EventSongColection extends EventSong {
   song: SongObj;
   member: MemberObj;
+  song_version: SongVersionObj;
 }
 
 interface ScrollDialogProps {
@@ -117,10 +131,14 @@ export default function ScrollDialog({
         eventSongsSelected.length === 0
       )
         return;
-      const mappedSongs = eventSongsSelected.map(({ song, member }) => ({
-        ...song,
-        member_id: member?.id,
-      }));
+      const mappedSongs = eventSongsSelected.map(
+        ({ song, member, song_version }) => ({
+          ...song,
+          member_id: member?.id,
+          song_version_id: song_version?.id ?? null,
+          song_version_name: song_version?.version_name ?? null,
+        }),
+      );
       setSongsEventArray(mappedSongs);
     } else {
       setEventObj(initialEventObjRef.current);
@@ -266,13 +284,19 @@ export default function ScrollDialog({
       if (songsEventArray == null || !songsEventArray.length) return;
       const [newSongs, existingSongs]: [EventSong[], EventSong[]] =
         songsEventArray.reduce(
-          (acc: [EventSong[], EventSong[]], song: SongObj, index: number) => {
-            const evntSng = {
+          (
+            acc: [EventSong[], EventSong[]],
+            song: SongObjExtended,
+            index: number,
+          ) => {
+            const evntSng: EventSong = {
               event_id: eventId,
               song_id: song.id,
               order: index + 1,
               member_id: song.member_id,
             };
+            if (song.song_version_id != null && song.song_version_id !== "")
+              evntSng.song_version_id = song.song_version_id;
             if (Object.prototype.hasOwnProperty.call(song, "__new_song")) {
               // New song
               acc[0].push(evntSng);
@@ -408,6 +432,7 @@ export default function ScrollDialog({
   const step2 = (
     <SearchSongs
       songsEventArray={songsEventArray}
+      eventSongsSelected={eventSongsSelected}
       setSongsEventArray={setSongsEventArray}
       idEvent={eventObj.id}
     />
@@ -429,7 +454,6 @@ export default function ScrollDialog({
         scroll="paper"
         aria-labelledby="scroll-dialog-title"
         aria-describedby="scroll-dialog-description"
-        aria-modal="true"
       >
         <DialogTitle id="scroll-dialog-title">
           {eventObj.id ? "Editar" : "Agregar"} evento
@@ -454,7 +478,9 @@ export default function ScrollDialog({
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancelar</Button>
+          <Button autoFocus onClick={handleClose}>
+            Cancelar
+          </Button>
           <Button
             color="inherit"
             disabled={activeStep === 0}

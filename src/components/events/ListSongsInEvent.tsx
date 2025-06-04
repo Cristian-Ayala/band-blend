@@ -56,6 +56,7 @@ export default function ListSongsInEvent({
                 <SongListItemMainStyle
                   key={eventSong.song.id}
                   song={eventSong.song}
+                  songVersion={eventSong.song_version}
                   hideOptions={true}
                   handleSongSelection={() => {}}
                   memberSel={eventSong.member}

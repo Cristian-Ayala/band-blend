@@ -1,5 +1,6 @@
 import AddEditSong, { SongObj } from "@/components/songs/AddEditSong";
 import DeleteSong from "@/components/songs/DeleteSong";
+import FilterSongs, { SongsFilterProps } from "@/components/songs/FilterSongs";
 import {
   Search,
   SearchIconWrapper,
@@ -7,7 +8,7 @@ import {
 } from "@/components/songs/SearchSongs";
 import SongListItemMainStyle from "@/components/songs/SongListItemMainStyle";
 import SortSongs, { SongsSortProps } from "@/components/songs/SortSongs";
-import FilterSongs, { SongsFilterProps } from "@/components/songs/FilterSongs";
+import ManageSongVersions from "@/components/versions/ManageSongVersions";
 import { GET_SONGS } from "@/store/graphql/queries/songs";
 import { useQuery } from "@apollo/client";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
@@ -21,6 +22,7 @@ import { useDebounce } from "use-debounce";
 
 export default function SongsIndex() {
   const [open, setOpen] = useState(false);
+  const [openVersionModal, setOpenVersionModal] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [debouncedText] = useDebounce(searchKeyword, 1000);
   const [openDeleteSongDialog, setOpenDeleteSongDialog] = useState(false);
@@ -28,10 +30,11 @@ export default function SongsIndex() {
   const [selectedSong, setSelectedSong] = useState<SongObj | null>(null);
 
   const handleSongSelection = useCallback(
-    (song: SongObj, openEditDialog: boolean) => {
+    (song: SongObj, openEditDialog: number) => {
       setSelectedSong(song);
-      if (openEditDialog) setOpen(true);
-      else setOpenDeleteSongDialog(true);
+      if (openEditDialog === 0) setOpen(true);
+      else if (openEditDialog === 1) setOpenVersionModal(true);
+      else if (openEditDialog === 2) setOpenDeleteSongDialog(true);
     },
     [],
   );
@@ -112,9 +115,7 @@ export default function SongsIndex() {
         <div className="grid gap-6">
           <div className="grid gap-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-50">
-                Canciones
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-50">Canciones</h2>
 
               <button
                 className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3"
@@ -193,6 +194,14 @@ export default function SongsIndex() {
         selectedSong={selectedSong}
         setSelectedSong={setSelectedSong}
       />
+      {selectedSong && (
+        <ManageSongVersions
+          open={openVersionModal}
+          setOpen={setOpenVersionModal}
+          refetchSongs={refetchSongs}
+          selectedSong={selectedSong}
+        />
+      )}
       {selectedSong && (
         <DeleteSong
           open={openDeleteSongDialog}

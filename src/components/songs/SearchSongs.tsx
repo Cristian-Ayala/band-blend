@@ -1,3 +1,4 @@
+import { EventSongColection } from "@/components/events/AddEditEvents";
 import { SongObj } from "@/components/songs/AddEditSong";
 import { reorder } from "@/plugins/helpers";
 import { DELETE_EVENT_SONG } from "@/store/graphql/mutations/events";
@@ -65,16 +66,21 @@ export interface SongsCollection {
   [key: number]: SongObjExtended;
 }
 
-interface SongObjExtended extends SongObj {
+export interface SongObjExtended extends SongObj {
   __new_song?: boolean;
+  song_version_id?: number | string;
+  song_version_name?: string | null;
+  member_id?: number | null;
 }
 
 export default function SearchSongs({
   songsEventArray,
+  eventSongsSelected,
   setSongsEventArray,
   idEvent,
 }: {
   songsEventArray: SongObjExtended[];
+  eventSongsSelected: EventSongColection[];
   setSongsEventArray: React.Dispatch<React.SetStateAction<SongObj[]>>;
   idEvent: number | null;
 }) {
@@ -114,7 +120,12 @@ export default function SearchSongs({
     event.preventDefault();
   };
 
-  const mutateSongCollection = (song: SongObjExtended) => {
+  const mutateSongCollection = (
+    song: SongObj,
+    songVerID?: number | string | null,
+    modifyVer?: boolean,
+    songVerName?: string | null,
+  ) => {
     if (song.id == null) return;
     let tmpSongsEvent = { ...songsEvent };
     if (Array.isArray(songsEvent)) {
@@ -132,9 +143,9 @@ export default function SearchSongs({
     if (Object.prototype.hasOwnProperty.call(songs, song.id)) {
       if (
         idEvent != null &&
-        !Object.prototype.hasOwnProperty.call(songs[song.id], "__new_song")
+        !Object.prototype.hasOwnProperty.call(songs[song.id], "__new_song") &&
+        !modifyVer
       ) {
-        // create query to delete song
         mutateDeleteEventSong({
           variables: {
             event_id: idEvent,
@@ -142,14 +153,27 @@ export default function SearchSongs({
           },
         });
       }
-      delete songs[song.id];
-      songsEventArray.splice(
-        songsEventArray.findIndex((tmpSong) => tmpSong.id === song.id),
-        1,
-      );
+
+      if (modifyVer) {
+        if (songVerID !== null) {
+          songs[song.id].song_version_id = songVerID;
+        }
+        songs[song.id].song_version_name = songVerName;
+      } else {
+        delete songs[song.id];
+        songsEventArray.splice(
+          songsEventArray.findIndex((tmpSong) => tmpSong.id === song.id),
+          1,
+        );
+      }
     } else {
       songs[song.id] = { ...song, __new_song: true };
-      songsEventArray.push({ ...song, __new_song: true });
+      if (songVerID != null) {
+        songs[song.id].song_version_id = songVerID;
+        songs[song.id].song_version_name = songVerName;
+      }
+
+      songsEventArray.push({ ...songs[song.id] });
     }
     setSongsEvent(songs);
   };
@@ -263,6 +287,7 @@ export default function SearchSongs({
       <SongsInPlaylist
         open={showListSongs}
         handleClose={handleClickShowListSongs}
+        eventSongsSelected={eventSongsSelected}
         mutateSongCollection={mutateSongCollection}
         songsEvent={songsEvent}
         songsEventArray={songsEventArray}

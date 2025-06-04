@@ -13,7 +13,7 @@ interface ScrollDialogProps {
   open: boolean;
   setOpen: (stateProp: boolean) => void;
   setSelectedMemberProp: (member: MemberObj) => void;
-  membersObj: { band_members: MemberObj[] };
+  bandMembers: MemberObj[];
   selectedMemberID: number | null;
 }
 
@@ -21,7 +21,7 @@ export default function SelectMember({
   open,
   setOpen,
   setSelectedMemberProp,
-  membersObj,
+  bandMembers,
   selectedMemberID,
 }: ScrollDialogProps) {
   const handleClose = () => {
@@ -37,24 +37,19 @@ export default function SelectMember({
   };
 
   useEffect(() => {
-    try {
-      if (selectedMember != null) return;
-      if (
-        selectedMemberID == null ||
-        membersObj == null ||
-        membersObj.band_members == null
-      )
-        throw new Error("No member selected");
-      const selMem: MemberObj | undefined = membersObj.band_members.find(
-        (member) => member.id === selectedMemberID,
-      );
-      if (selMem == null) throw new Error("No member found");
-      setSelectedMember(selMem);
-      setSelectedMemberProp(selMem);
-    } catch (error) {
-      setSelectedMember(null);
+    if (selectedMemberID == null || !Array.isArray(bandMembers)) {
+      if (selectedMember !== null) setSelectedMember(null);
+      return;
     }
-  }, [selectedMemberID, membersObj, setSelectedMemberProp, selectedMember]);
+
+    const selMem =
+      bandMembers.find((member) => member.id === selectedMemberID) ?? null;
+
+    if ((selectedMember?.id ?? null) !== (selMem?.id ?? null)) {
+      setSelectedMember(selMem);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMemberID, bandMembers]);
 
   return (
     <>
@@ -69,7 +64,7 @@ export default function SelectMember({
         <DialogTitle id="scroll-dialog-title">Seleccionar Director</DialogTitle>
         <DialogContent dividers={true}>
           <Box sx={{ width: "100%", height: "50vh" }}>
-            {membersObj.band_members && (
+            {bandMembers && (
               <Autocomplete
                 value={selectedMember || null}
                 disablePortal
@@ -79,7 +74,7 @@ export default function SelectMember({
                 getOptionLabel={(option: MemberObj) =>
                   `${option.first_name} ${option.last_name}` || ""
                 }
-                options={membersObj.band_members}
+                options={bandMembers}
                 onChange={(_, newValue: MemberObj | null) => {
                   setSelectedMember(newValue);
                 }}

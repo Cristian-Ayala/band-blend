@@ -42,7 +42,6 @@ export interface SongObj {
   lyrics: string;
   play_count: number;
   last_time_played: string | null;
-  member_id?: number | null;
 }
 
 export default function AddEditSong({
@@ -180,15 +179,6 @@ export default function AddEditSong({
           }
         />
       </Grid>
-      {/* <Grid item xs={12}>
-        <TextField
-          fullWidth
-          id="song_album"
-          label="Album"
-          value={songObj.album}
-          onChange={(e) => setSongObj({ ...songObj, album: e.target.value })}
-        />
-      </Grid> */}
       <Grid item xs={6}>
         <LocalizationProvider
           dateAdapter={AdapterDayjs}

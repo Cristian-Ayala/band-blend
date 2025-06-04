@@ -1,5 +1,8 @@
-import { SongObj } from "@/components/songs/AddEditSong";
-import { SongsCollection } from "@/components/songs/SearchSongs";
+import { EventSongColection } from "@/components/events/AddEditEvents";
+import {
+  SongObjExtended,
+  SongsCollection,
+} from "@/components/songs/SearchSongs";
 import { GET_MEMBERS } from "@/store/graphql/queries/members";
 import { useQuery } from "@apollo/client";
 import {
@@ -31,15 +34,22 @@ interface SongsInPlaylistProps {
   songsEvent: SongsCollection;
   open: boolean;
   handleClose: () => void;
-  mutateSongCollection: (song: SongObj) => void;
+  eventSongsSelected: EventSongColection[];
+  mutateSongCollection: (
+    song: SongObjExtended,
+    songVerID?: number | string | null,
+    modifyVer?: boolean,
+    songVerName?: string | null,
+  ) => void;
   onDragEnd: OnDragEndResponder;
-  songsEventArray: SongObj[];
-  setMemberInSong: (song: SongObj, member_id: number) => void;
+  songsEventArray: SongObjExtended[];
+  setMemberInSong: (song: SongObjExtended, member_id: number) => void;
 }
 
 const SongsInPlaylist = ({
   open,
   handleClose,
+  eventSongsSelected,
   mutateSongCollection,
   onDragEnd,
   songsEventArray,
@@ -48,7 +58,6 @@ const SongsInPlaylist = ({
   const { loading, error, data } = useQuery(GET_MEMBERS, {
     fetchPolicy: "network-only",
   });
-
   if (loading) return "Loading...";
   if (error) return `Error! ${error.message}`;
   return (
@@ -76,6 +85,7 @@ const SongsInPlaylist = ({
                       <DraggableListItem
                         key={song.id}
                         song={song}
+                        eventSongsSelected={eventSongsSelected}
                         mutateSongCollection={mutateSongCollection}
                         index={index}
                         setMemberInSong={setMemberInSong}

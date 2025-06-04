@@ -1,6 +1,8 @@
-import { SongObj } from "@/components/songs/AddEditSong";
+import { EventSongColection } from "@/components/events/AddEditEvents";
+import { SongObjExtended } from "@/components/songs/SearchSongs.tsx";
 import { MemberObj } from "@/pages/members/MembersIndex";
 import { Draggable } from "@hello-pangea/dnd";
+import ArticleIcon from "@mui/icons-material/Article";
 import Delete from "@mui/icons-material/Delete";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import Grid from "@mui/material/Grid";
@@ -12,30 +14,55 @@ import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import { useEffect, useState } from "react";
 import SelectMember from "../members/SelectMember";
-
+import SongVersions, { SongsVersions } from "./SongVersions";
 interface songListItemProps {
-  song: SongObj;
-  mutateSongCollection: (song: SongObj) => void;
-  setMemberInSong: (song: SongObj, member_id: number) => void;
+  song: SongObjExtended;
+  eventSongsSelected: EventSongColection[];
+  mutateSongCollection: (
+    song: SongObjExtended,
+    songVerID: number | string | null,
+    modifyVer: boolean,
+    songVerName: string | null,
+  ) => void;
+  setMemberInSong: (song: SongObjExtended, member_id: number) => void;
   index: number;
   membersObj: { band_members: MemberObj[] };
 }
 export default function SongListItem({
   song,
+  eventSongsSelected,
   mutateSongCollection,
   setMemberInSong,
   index,
   membersObj,
 }: songListItemProps) {
   const [songHasId, setSongHasId] = useState(false);
+  const [songVersionObj, setSongVersionObj] = useState<SongsVersions | null>(
+    null,
+  );
   const [modalSelectMembers, setModalSelectMembers] = useState(false);
+  const [modalSelectVer, setModalSelectVer] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MemberObj | null>();
-
   const setSelectedMemberProp = (member: MemberObj) => {
     if (!member || member.id == null) return;
     setMemberInSong(song, member.id);
     setSelectedMember(member);
   };
+
+  useEffect(() => {
+    const songVersionRaw =
+      eventSongsSelected?.find((s) => s.song_id === song.id)?.song_version ||
+      null;
+    if (songVersionRaw) {
+      const { id, ...rest } = songVersionRaw;
+      setSongVersionObj({
+        ...rest,
+        id: id === null ? undefined : id,
+      });
+    } else {
+      setSongVersionObj(null);
+    }
+  }, [eventSongsSelected, song.id]);
 
   useEffect(() => {
     setSongHasId(song != null && song.id != null);
@@ -53,10 +80,18 @@ export default function SongListItem({
               sx={snapshot?.isDragging ? { background: "#292929" } : {}}
             >
               <Grid container spacing={2}>
-                <Grid item xs={songHasId ? 8 : 12}>
+                <Grid item xs={songHasId ? 7.5 : 12}>
                   <Grid item xs={12}>
                     <ListItemText primary={song?.title} />
                   </Grid>
+                  {song.song_version_name && (
+                    <Grid item xs={12}>
+                      <ListItemText
+                        primary={`${song.song_version_name}`}
+                        className="text-gray-400 fs-subtitle"
+                      />
+                    </Grid>
+                  )}
                   {selectedMember && (
                     <Grid item xs={12}>
                       <ListItemText
@@ -66,8 +101,8 @@ export default function SongListItem({
                     </Grid>
                   )}
                 </Grid>
-                {songHasId ? (
-                  <Grid item xs={2}>
+                {songHasId && (
+                  <Grid item xs={1.5}>
                     <ListItemButton>
                       <ListItemIcon>
                         <IconButton
@@ -82,18 +117,35 @@ export default function SongListItem({
                       </ListItemIcon>
                     </ListItemButton>
                   </Grid>
-                ) : (
-                  ""
                 )}
-                {songHasId ? (
-                  <Grid item xs={2}>
+                {songHasId && (
+                  <Grid item xs={1.5}>
                     <ListItemButton>
                       <ListItemIcon>
                         <IconButton
                           aria-label="add"
                           size="small"
                           sx={{ marginRight: "1rem" }}
-                          onClick={() => mutateSongCollection(song)}
+                          onClick={() => setModalSelectVer(true)}
+                          className="focus:outline-none"
+                        >
+                          <ArticleIcon />
+                        </IconButton>
+                      </ListItemIcon>
+                    </ListItemButton>
+                  </Grid>
+                )}{" "}
+                {songHasId && (
+                  <Grid item xs={1.5}>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <IconButton
+                          aria-label="add"
+                          size="small"
+                          sx={{ marginRight: "1rem" }}
+                          onClick={() =>
+                            mutateSongCollection(song, null, false, null)
+                          }
                           className="focus:outline-none"
                         >
                           <Delete />
@@ -101,8 +153,6 @@ export default function SongListItem({
                       </ListItemIcon>
                     </ListItemButton>
                   </Grid>
-                ) : (
-                  ""
                 )}
               </Grid>
             </ListItem>
@@ -113,8 +163,16 @@ export default function SongListItem({
         open={modalSelectMembers}
         setOpen={setModalSelectMembers}
         setSelectedMemberProp={setSelectedMemberProp}
-        membersObj={membersObj}
+        bandMembers={membersObj?.band_members}
         selectedMemberID={song?.member_id ?? null}
+      />
+      <SongVersions
+        open={modalSelectVer}
+        setOpen={setModalSelectVer}
+        songVersionObj={songVersionObj}
+        mutateSongCollection={mutateSongCollection}
+        song={song}
+        usedInDraggableItem={true}
       />
     </>
   );
